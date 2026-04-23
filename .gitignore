@@ -1,0 +1,31 @@
+# / Backend /
+
+# Dependencies
+backend/vendor/
+backend/node_modules/
+
+# NPM
+backend/package-lock.json
+
+# Composer
+backend/composer.lock
+
+# Application Cache
+backend/bootstrap/cache/*.php
+
+# Environment
+backend/.env
+
+# / Frontend /
+
+# Dependencies
+frontend/node_modules/
+
+# Build Output
+frontend/.nuxt/
+
+# NPM
+frontend/package-lock.json
+
+# Environment
+frontend/.env

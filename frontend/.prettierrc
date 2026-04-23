@@ -1,0 +1,23 @@
+{
+  "overrides": [
+    {
+      "files": "*.vue",
+      "options": {
+        "semi": false,
+        "singleQuote": true,
+        "quoteProps": "as-needed",
+        "trailingComma": "none",
+        "printWidth": 80,
+        "tabWidth": 2,
+        "useTabs": false,
+        "bracketSpacing": true,
+        "bracketSameLine": false,
+        "arrowParens": "always",
+        "endOfLine": "lf",
+        "vueIndentScriptAndStyle": true,
+        "htmlWhitespaceSensitivity": "css",
+        "singleAttributePerLine": false
+      }
+    }
+  ]
+}
