@@ -65,16 +65,10 @@ cd backend
 composer install
 ```
 
-### Copy file environment
+### Install dependency
 
 ```bash
-cp .env.example .env
-```
-
-### Generate application key
-
-```bash
-php artisan key:generate
+npm install
 ```
 
 ### Jalankan migrasi
@@ -109,12 +103,6 @@ cd frontend
 
 ```bash
 npm install
-```
-
-### Copy file environment
-
-```bash
-cp .env.example .env
 ```
 
 ### Jalankan development server
