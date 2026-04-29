@@ -12,6 +12,7 @@ Aplikasi berbasis **Laravel (Backend)** dan **Nuxt (Frontend)**.
 
 ### Frontend
 
+* Node
 * Nuxt
 * Vue
 * Tailwind CSS
