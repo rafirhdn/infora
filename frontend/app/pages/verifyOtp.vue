@@ -5,22 +5,17 @@
     <div>
       <!-- Title -->
       <div>
-        <span>Lupa password anda?</span>
+        <span>Masukkan kode OTP anda</span>
       </div>
 
       <!-- Input Box -->
       <div>
-        <input type="email" placeholder="Masukkan email" />
+        <input type="email" placeholder="Masukkan kode OTP" />
       </div>
 
       <!-- Button -->
       <div>
-        <button type="submit">Kirim</button>
-      </div>
-
-      <!-- Link -->
-      <div>
-        <span>Ingat password anda?<NuxtLink>Kembali</NuxtLink></span>
+        <button type="submit">Verifikasi</button>
       </div>
 
       <!-- Error -->
