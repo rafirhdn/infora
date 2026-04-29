@@ -25,7 +25,7 @@
 
       <!-- Link -->
       <div>
-        <span>Lupa password anda?<NuxtLink>Klik di sini</NuxtLink></span>
+        <span>Lupa password anda?<NuxtLink to="/verifyEmail">Klik di sini</NuxtLink></span>
       </div>
 
       <!-- Error -->

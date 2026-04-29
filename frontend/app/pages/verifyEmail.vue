@@ -20,7 +20,7 @@
 
       <!-- Link -->
       <div>
-        <span>Ingat password anda?<NuxtLink>Kembali</NuxtLink></span>
+        <span>Ingat password anda?<NuxtLink to="/login">Kembali</NuxtLink></span>
       </div>
 
       <!-- Error -->
