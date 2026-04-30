@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+@theme {
+  /* Light */
+  --color-hover: #ebebeb;
+  --color-focus: #e8e8e8;
+  --color-primary-bg: #fafafa;
+  --color-secondary-bg: #f5f5f5;
+  --color-text-base-dark: #1a1a1a;
+  --color-text-muted-dark: #808080;
+  --color-text-base-light: #f5f5f5;
+  --color-text-muted-light: #f0f0f0;
+  --color-primary-border: #e6e6e6;
+  --color-secondary-border: #cccccc;
+
+  /* Primary */
+  --color-flamingo-50: #fff4ec;
+  --color-flamingo-100: #ffe6d3;
+  --color-flamingo-200: #ffc9a6;
+  --color-flamingo-300: #ffa36d;
+  --color-flamingo-400: #ff7233;
+  --color-flamingo-500: #ff4d0b;
+  --color-flamingo-600: #e93001;
+  --color-flamingo-700: #cb2103;
+  --color-flamingo-800: #a11c0b;
+  --color-flamingo-900: #811a0d;
+  --color-flamingo-950: #460904;
+}
