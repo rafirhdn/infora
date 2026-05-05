@@ -1,6 +1,12 @@
+<!-- app.vue -->
 <template>
   <div>
-    <NuxtRouteAnnouncer />
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
+
+<script setup>
+// Root component
+</script>
