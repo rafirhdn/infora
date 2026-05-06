@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Akun;
 
 return [
 
@@ -17,7 +17,7 @@ return [
 
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'akun'),
     ],
 
     /*
@@ -40,7 +40,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'akun',
         ],
     ],
 
@@ -64,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model'  => App\Models\Akun::class,
         ],
 
         // 'users' => [

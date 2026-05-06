@@ -29,6 +29,12 @@ root/
         ├── Http/
             ├── Controllers/
                 ├── Api/ # Backend API
+                ├── manajemenAbsensi/
+                ├── manajemenAkademik/
+                ├── manajemenEkstrakurikuler/
+                ├── manajemenSurat/
+                ├── manajemenBimbinganKonseling/
+                ├── autentikasi/
 └── frontend/  # Nuxt
     ├── app/
         ├── pages/ # Frontend Interface
@@ -37,6 +43,7 @@ root/
             ├── manajemen-ekstrakurikuler/
             ├── manajemen-surat/
             ├── manajemen-bimbingan-konseling/
+            ├── autentikasi/
 ```
 
 ---
@@ -60,13 +67,13 @@ Masuk ke folder backend:
 cd backend
 ```
 
-### Install dependency
+### Install Laravel dependency
 
 ```bash
 composer install
 ```
 
-### Install dependency
+### Install Node dependency
 
 ```bash
 npm install
