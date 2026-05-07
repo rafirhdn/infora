@@ -2,6 +2,10 @@
 @import "@nuxt/ui";
 
 @theme {
+  /* Font */
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "DM Mono", monospace;
+
   /* Light */
   --color-hover: #ebebeb;
   --color-focus: #e8e8e8;
@@ -9,10 +13,10 @@
   --color-subtle-bg: #f5f5f5;
   --color-faint-border: #e6e6e6;
   --color-default-border: #cccccc;
-  --color-text-base-dark: #1a1a1a;
-  --color-text-muted-dark: #808080;
-  --color-text-base-light: #f5f5f5;
-  --color-text-muted-light: #f0f0f0;
+  --color-base-dark: #1a1a1a;
+  --color-muted-dark: #808080;
+  --color-base-light: #f5f5f5;
+  --color-muted-light: #f0f0f0;
 
   /* Primary */
   --color-flamingo-50: #fff4ec;
@@ -26,4 +30,17 @@
   --color-flamingo-800: #a11c0b;
   --color-flamingo-900: #811a0d;
   --color-flamingo-950: #460904;
+
+  /* Secondary */
+  --color-woodsmoke-50: #fafafa;
+  --color-woodsmoke-100: #f5f5f5;
+  --color-woodsmoke-200: #e6e6e6;
+  --color-woodsmoke-300: #d3d3d3;
+  --color-woodsmoke-400: #a3a3a3;
+  --color-woodsmoke-500: #727272;
+  --color-woodsmoke-600: #535353;
+  --color-woodsmoke-700: #404040;
+  --color-woodsmoke-800: #272727;
+  --color-woodsmoke-900: #1a1a1a;
+  --color-woodsmoke-950: #0b0b0b;
 }
