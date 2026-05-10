@@ -2,19 +2,10 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
 
   // Modules
-  modules: ["@nuxt/fonts", "@nuxt/image", "@nuxt/ui"],
+  modules: ["@nuxt/fonts", "@nuxt/image", "@nuxt/ui", "@nuxt/icon"],
 
   // Devtools
   devtools: { enabled: true },
-
-  // Css
-  css: [
-    "./app/assets/css/main.css",
-    "@fortawesome/fontawesome-svg-core/styles.css",
-  ],
-  features: {
-    inlineStyles: true,
-  },
 
   // Fonts
   fonts: {
@@ -22,6 +13,15 @@ export default defineNuxtConfig({
       { name: "DM Sans", provider: "google" },
       { name: "DM Mono", provider: "google" },
     ],
+  },
+
+  // UI
+  css: [
+    "./app/assets/css/main.css",
+    "@fortawesome/fontawesome-svg-core/styles.css",
+  ],
+  features: {
+    inlineStyles: true,
   },
 
   // Components
