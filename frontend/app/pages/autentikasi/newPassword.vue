@@ -1,4 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  const showNewPassword = ref(false)
+  const showNewPasswordAgain = ref(false)
+</script>
 
 <template>
   <form
@@ -19,26 +22,41 @@
 
       <div class="flex flex-col gap-4">
         <!-- Input Box -->
-        <div>
+        <div class="relative w-sm">
           <input
-            class="w-sm px-3.5 py-1.5 outline-none border border-default-border cursor rounded-md text-base text-base-dark placeholder:text-woodsmoke-400 focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
-            type="password"
+            class="w-full px-3.5 py-1.5 pr-10 outline-none border border-default-border rounded-md text-base text-base-dark placeholder:text-muted-dark focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
+            :type="showNewPassword ? 'text' : 'password'"
             placeholder="Masukkan kata sandi baru"
+          />
+          <Icon
+            :name="showNewPassword ? 'hugeicons:view' : 'hugeicons:view-off'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-dark w-6 h-6 cursor-pointer"
+            @click="showNewPassword = !showNewPassword"
           />
         </div>
 
         <!-- Input Box -->
-        <div>
+        <div class="relative w-sm">
           <input
-            class="w-sm px-3.5 py-1.5 outline-none border border-default-border cursor rounded-md text-base text-base-dark placeholder:text-woodsmoke-400 focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
-            type="password"
-            placeholder="Masukkan ulang kata sandi"
+            class="w-full px-3.5 py-1.5 pr-10 outline-none border border-default-border rounded-md text-base text-base-dark placeholder:text-muted-dark focus:ring-2 focus:ringset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
+            :type="showNewPasswordAgain ? 'text' : 'password'"
+            placeholder="Masukkan kata sandi ulang"
+          />
+          <Icon
+            :name="showNewPasswordAgain ? 'hugeicons:view' : 'hugeicons:view-off'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-dark w-6 h-6 cursor-pointer"
+            @click="showNewPasswordAgain = !showNewPasswordAgain"
           />
         </div>
 
         <!-- Button -->
         <div>
-          <button class="w-full font-medium py-2 rounded-md cursor-pointer bg-flamingo-500 text-base-light hover:bg-flamingo-600 transition-colors duration-150 ease-in" type="submit">Perbarui</button>
+          <button
+            class="w-full font-medium py-2 rounded-md cursor-pointer bg-flamingo-500 text-base-light hover:bg-flamingo-600 transition-colors duration-150 ease-in"
+            type="submit"
+          >
+            Perbarui
+          </button>
         </div>
       </div>
 

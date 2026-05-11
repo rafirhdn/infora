@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  const showPassword = ref(false)
+</script>
 
 <template>
   <form
@@ -13,7 +15,9 @@
         </div>
         <!-- Title -->
         <div class="flex flex-col">
-          <span class="text-2xl font-medium text-base-dark">Selamat datang di Infora!</span>
+          <span class="text-2xl font-medium text-base-dark"
+            >Selamat datang di Infora!</span
+          >
           <span
             class="max-w-sm leading-snug text-base font-normal text-muted-dark"
             >Akses sistem manajemen dan lanjutkan aktivitas.</span
@@ -25,18 +29,23 @@
         <!-- Input Box -->
         <div>
           <input
-            class="w-sm px-3.5 py-1.5 outline-none border border-default-border cursor rounded-md text-base text-base-dark placeholder:text-woodsmoke-400 focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
+            class="w-sm px-3.5 py-1.5 outline-none border border-default-border cursor rounded-md text-base text-base-dark placeholder:text-muted-dark focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
             type="email"
             placeholder="Masukkan email"
           />
         </div>
 
         <!-- Input Box -->
-        <div>
+        <div class="relative w-sm">
           <input
-            class="w-sm px-3.5 py-1.5 outline-none border border-default-border cursor rounded-md text-base text-base-dark placeholder:text-woodsmoke-400 focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
-            type="email"
+            class="w-full px-3.5 py-1.5 pr-10 outline-none border border-default-border rounded-md text-base text-base-dark placeholder:text-muted-dark focus:ring-2 focus:ring-offset-2 focus:ring-flamingo-500 transition-all duration-150 ease-in"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="Masukkan kata sandi"
+          />
+          <Icon
+            :name="showPassword ? 'hugeicons:view' : 'hugeicons:view-off'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-dark w-6 h-6 cursor-pointer"
+            @click="showPassword = !showPassword"
           />
         </div>
 
