@@ -29,21 +29,22 @@ root/
         ├── Http/
             ├── Controllers/
                 ├── Api/ # Backend API
-                ├── manajemenAbsensi/
-                ├── manajemenAkademik/
-                ├── manajemenEkstrakurikuler/
-                ├── manajemenSurat/
-                ├── manajemenBimbinganKonseling/
-                ├── autentikasi/
+                    ├── autentikasi/
+                    ├── manajemenAbsensi/
+                    ├── manajemenAkademik/
+                    ├── manajemenEkstrakurikuler/
+                    ├── manajemenSurat/
+                    ├── manajemenBimbinganKonseling/
 └── frontend/  # Nuxt
     ├── app/
         ├── pages/ # Frontend Interface
-            ├── manajemen-absensi/
-            ├── manajemen-akademik/
-            ├── manajemen-ekstrakurikuler/
-            ├── manajemen-surat/
-            ├── manajemen-bimbingan-konseling/
             ├── autentikasi/
+            ├── halamanLanding/
+            ├── manajemenAbsensi/
+            ├── manajemenAkademik/
+            ├── manajemenEkstrakurikuler/
+            ├── manajemenSurat/
+            ├── manajemenBimbinganKonseling/
 ```
 
 ---
