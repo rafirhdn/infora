@@ -1,4 +1,3 @@
-<!-- app.vue -->
 <template>
   <div>
     <NuxtLayout>
@@ -6,7 +5,3 @@
     </NuxtLayout>
   </div>
 </template>
-
-<script setup>
-// Root component
-</script>
