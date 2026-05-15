@@ -383,6 +383,7 @@ return new class extends Migration
             $table->bigIncrements('id_ekstrakurikuler');
             $table->string('nama', 100);
             $table->text('deskripsi_singkat')->nullable();
+            $table->text('penawaran_ekskul')->nullable();
             $table->text('visi')->nullable();
             $table->text('misi')->nullable();
             $table->string('gambar', 255)->nullable();
