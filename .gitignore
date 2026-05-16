@@ -29,3 +29,5 @@ frontend/package-lock.json
 
 # Environment
 frontend/.env
+
+frontend/.output
