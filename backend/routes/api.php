@@ -227,6 +227,5 @@ Route::prefix('manajemen-akademik')
                 );
 
             });
-
     });
 // ------ //
