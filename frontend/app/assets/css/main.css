@@ -7,40 +7,40 @@
   --font-mono: "DM Mono", monospace;
 
   /* Light */
-  --color-hover: #ebebeb;
-  --color-focus: #e8e8e8;
-  --color-canvas: #fafafa;
-  --color-subtle: #f5f5f5;
-  --color-faint: #e6e6e6;
-  --color-default: #cccccc;
-  --color-base-dark: #1a1a1a;
-  --color-muted-dark: #808080;
-  --color-base-light: #f5f5f5;
-  --color-muted-light: #f0f0f0;
+  --color-surface-hover: hsl(0, 0%, 90%);
+  --color-surface-focus: hsl(0, 0%, 92%);
+  --color-surface-canvas: hsl(0, 0%, 98%);
+  --color-surface-subtle: hsl(0, 0%, 96%);
+  --color-line-faint: hsl(0, 0%, 86%);
+  --color-line-slate: hsl(0, 0%, 82%);
+  --color-ink-base-dark: hsl(0, 0%, 10%);
+  --color-ink-muted-dark: hsl(0, 0%, 30%);
+  --color-ink-base-light: hsl(0, 0%, 96%);
+  --color-ink-muted-light: hsl(0, 0%, 94%);
 
   /* Primary */
-  --color-flamingo-50: #fff4ec;
-  --color-flamingo-100: #ffe6d3;
-  --color-flamingo-200: #ffc9a6;
-  --color-flamingo-300: #ffa36d;
-  --color-flamingo-400: #ff7233;
-  --color-flamingo-500: #ff4d0b;
-  --color-flamingo-600: #e93001;
-  --color-flamingo-700: #cb2103;
-  --color-flamingo-800: #a11c0b;
-  --color-flamingo-900: #811a0d;
-  --color-flamingo-950: #460904;
+  --color-flamingo-50: hsl(25, 100%, 96%);
+  --color-flamingo-100: hsl(26, 100%, 91%);
+  --color-flamingo-200: hsl(24, 100%, 83%);
+  --color-flamingo-300: hsl(22, 100%, 71%);
+  --color-flamingo-400: hsl(19, 100%, 60%);
+  --color-flamingo-500: hsl(16, 100%, 52%);
+  --color-flamingo-600: hsl(12, 99%, 46%);
+  --color-flamingo-700: hsl(9, 97%, 40%);
+  --color-flamingo-800: hsl(7, 87%, 34%);
+  --color-flamingo-900: hsl(7, 82%, 28%);
+  --color-flamingo-950: hsl(5, 89%, 15%);
 
   /* Secondary */
-  --color-woodsmoke-50: #fafafa;
-  --color-woodsmoke-100: #f5f5f5;
-  --color-woodsmoke-200: #e6e6e6;
-  --color-woodsmoke-300: #d3d3d3;
-  --color-woodsmoke-400: #a3a3a3;
-  --color-woodsmoke-500: #727272;
-  --color-woodsmoke-600: #535353;
-  --color-woodsmoke-700: #404040;
-  --color-woodsmoke-800: #272727;
-  --color-woodsmoke-900: #1a1a1a;
-  --color-woodsmoke-950: #0b0b0b;
+  --color-woodsmoke-50: hsl(0, 0%, 98%);
+  --color-woodsmoke-100: hsl(0, 0%, 96%);
+  --color-woodsmoke-200: hsl(0, 0%, 90%);
+  --color-woodsmoke-300: hsl(0, 0%, 83%);
+  --color-woodsmoke-400: hsl(0, 0%, 64%);
+  --color-woodsmoke-500: hsl(0, 0%, 45%);
+  --color-woodsmoke-600: hsl(0, 0%, 33%);
+  --color-woodsmoke-700: hsl(0, 0%, 25%);
+  --color-woodsmoke-800: hsl(0, 0%, 15%);
+  --color-woodsmoke-900: hsl(0, 0%, 10%);
+  --color-woodsmoke-950: hsl(0, 0%, 4%);
 }
