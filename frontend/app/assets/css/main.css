@@ -7,12 +7,14 @@
   --font-mono: "DM Mono", monospace;
 
   /* Light */
-  --color-surface-hover: hsl(0, 0%, 90%);
-  --color-surface-focus: hsl(0, 0%, 92%);
+  --color-canvas-hover: hsl(0, 0%, 96%);
+  --color-canvas-focus: hsl(0, 0%, 90%);
+  --color-subtle-hover: hsl(0, 0%, 94%);
+  --color-subtle-focus: hsl(0, 0%, 92%);
   --color-surface-canvas: hsl(0, 0%, 98%);
   --color-surface-subtle: hsl(0, 0%, 96%);
-  --color-line-faint: hsl(0, 0%, 86%);
-  --color-line-slate: hsl(0, 0%, 82%);
+  --color-line-faint: hsl(0, 0%, 88%);
+  --color-line-slate: hsl(0, 0%, 80%);
   --color-ink-base-dark: hsl(0, 0%, 10%);
   --color-ink-muted-dark: hsl(0, 0%, 30%);
   --color-ink-base-light: hsl(0, 0%, 96%);
