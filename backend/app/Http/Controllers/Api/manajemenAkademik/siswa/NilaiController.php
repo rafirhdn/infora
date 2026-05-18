@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\manajemenAkademik\Siswa;
+namespace App\Http\Controllers\Api\manajemenAkademik\siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nilai;

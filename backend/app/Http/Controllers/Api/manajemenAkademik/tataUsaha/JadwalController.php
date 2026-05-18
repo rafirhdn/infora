@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\manajemenAkademik\Admin;
+namespace App\Http\Controllers\Api\manajemenAkademik\tataUsaha;
 
 use App\Http\Controllers\Controller;
 use App\Models\Jadwal;

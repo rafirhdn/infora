@@ -1,45 +1,52 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\Api\autentikasi\AuthController;
+
 
 // SISTEM MANAJEMEN AKADEMIK
 // ------ //
-use App\Http\Controllers\Api\manajemenAkademik\Admin\JurusanController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\SemesterController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\KelasController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\SiswaController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\GuruController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\OrangTuaController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\MataPelajaranController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\KompetensiController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\JadwalController;
-use App\Http\Controllers\Api\manajemenAkademik\Admin\AnggotaKelasController;
 
-use App\Http\Controllers\Api\manajemenAkademik\Guru\JadwalController as GuruJadwalController;
-use App\Http\Controllers\Api\manajemenAkademik\Guru\TugasController as GuruTugasController;
-use App\Http\Controllers\Api\manajemenAkademik\Guru\PengajuanTugasController as GuruPengajuanTugasController;
-use App\Http\Controllers\Api\manajemenAkademik\Guru\NilaiController as GuruNilaiController;
-use App\Http\Controllers\Api\manajemenAkademik\Guru\SiswaController as GuruSiswaController;
-use App\Http\Controllers\Api\manajemenAkademik\Guru\RaporController as GuruRaporController;
+// TATA USAHA
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\JurusanController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\SemesterController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\KelasController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\SiswaController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\GuruController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\OrangTuaController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\MataPelajaranController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\KompetensiController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\JadwalController;
+use App\Http\Controllers\Api\manajemenAkademik\tataUsaha\AnggotaKelasController;
 
-use App\Http\Controllers\Api\manajemenAkademik\Siswa\JadwalController as SiswaJadwalController;
-use App\Http\Controllers\Api\manajemenAkademik\Siswa\TugasController as SiswaTugasController;
-use App\Http\Controllers\Api\manajemenAkademik\Siswa\PengajuanTugasController as SiswaPengajuanTugasController;
-use App\Http\Controllers\Api\manajemenAkademik\Siswa\NilaiController as SiswaNilaiController;
-use App\Http\Controllers\Api\manajemenAkademik\Siswa\RaporController as SiswaRaporController;
+// GURU
+use App\Http\Controllers\Api\manajemenAkademik\guru\JadwalController as GuruJadwalController;
+use App\Http\Controllers\Api\manajemenAkademik\guru\TugasController as GuruTugasController;
+use App\Http\Controllers\Api\manajemenAkademik\guru\PengajuanTugasController as GuruPengajuanTugasController;
+use App\Http\Controllers\Api\manajemenAkademik\guru\NilaiController as GuruNilaiController;
+use App\Http\Controllers\Api\manajemenAkademik\guru\SiswaController as GuruSiswaController;
+use App\Http\Controllers\Api\manajemenAkademik\guru\RaporController as GuruRaporController;
 
-use App\Http\Controllers\Api\manajemenAkademik\OrangTua\NilaiController as OrangTuaNilaiController;
-use App\Http\Controllers\Api\manajemenAkademik\OrangTua\RaporController as OrangTuaRaporController;
-use App\Http\Controllers\Api\manajemenAkademik\OrangTua\JadwalController as OrangTuaJadwalController;
+// SISWA
+use App\Http\Controllers\Api\manajemenAkademik\siswa\JadwalController as SiswaJadwalController;
+use App\Http\Controllers\Api\manajemenAkademik\siswa\TugasController as SiswaTugasController;
+use App\Http\Controllers\Api\manajemenAkademik\siswa\PengajuanTugasController as SiswaPengajuanTugasController;
+use App\Http\Controllers\Api\manajemenAkademik\siswa\NilaiController as SiswaNilaiController;
+use App\Http\Controllers\Api\manajemenAkademik\siswa\RaporController as SiswaRaporController;
 
-use App\Http\Controllers\Api\manajemenAkademik\Waka\JadwalController as WakaJadwalController;
-use App\Http\Controllers\Api\manajemenAkademik\Waka\NilaiController as WakaNilaiController;
-use App\Http\Controllers\Api\manajemenAkademik\Waka\RaporController as WakaRaporController;
-use App\Http\Controllers\Api\manajemenAkademik\Waka\MataPelajaranController as WakaMataPelajaranController;
-use App\Http\Controllers\Api\manajemenAkademik\Waka\KompetensiController as WakaKompetensiController;
-use App\Http\Controllers\Api\manajemenAkademik\Waka\MonitoringController;
+// ORANG TUA
+use App\Http\Controllers\Api\manajemenAkademik\orangTua\NilaiController as OrangTuaNilaiController;
+use App\Http\Controllers\Api\manajemenAkademik\orangTua\RaporController as OrangTuaRaporController;
+use App\Http\Controllers\Api\manajemenAkademik\orangTua\JadwalController as OrangTuaJadwalController;
+
+// WAKA
+use App\Http\Controllers\Api\manajemenAkademik\waka\JadwalController as WakaJadwalController;
+use App\Http\Controllers\Api\manajemenAkademik\waka\NilaiController as WakaNilaiController;
+use App\Http\Controllers\Api\manajemenAkademik\waka\RaporController as WakaRaporController;
+use App\Http\Controllers\Api\manajemenAkademik\waka\MataPelajaranController as WakaMataPelajaranController;
+use App\Http\Controllers\Api\manajemenAkademik\waka\KompetensiController as WakaKompetensiController;
+use App\Http\Controllers\Api\manajemenAkademik\waka\MonitoringController;
+
 // ------ //
 
 

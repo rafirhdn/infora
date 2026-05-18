@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\manajemenAkademik\Guru;
+namespace App\Http\Controllers\Api\manajemenAkademik\guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rapor;

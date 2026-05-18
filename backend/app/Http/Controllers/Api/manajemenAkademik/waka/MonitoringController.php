@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\manajemenAkademik\Waka;
+namespace App\Http\Controllers\Api\manajemenAkademik\waka;
 
 use App\Http\Controllers\Controller;
 use App\Models\Siswa;

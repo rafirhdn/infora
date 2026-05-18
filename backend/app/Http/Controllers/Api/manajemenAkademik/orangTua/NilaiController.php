@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\manajemenAkademik\OrangTua;
+namespace App\Http\Controllers\Api\manajemenAkademik\orangTua;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nilai;
