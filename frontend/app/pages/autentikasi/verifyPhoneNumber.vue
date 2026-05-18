@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts">
   // Layout halaman
   definePageMeta({
     layout: 'authentication'
@@ -12,11 +12,11 @@
       <!-- Title -->
       <div class="flex flex-col gap-1.5 text-center">
         <span class="text-2xl tracking-tight font-medium text-ink-base-dark">
-          Lupa Kata Sandi?
+          Verifikasi Nomor Telepon!
         </span>
         <span
           class="max-w-sm leading-snug tracking-tight text-base font-normal text-ink-muted-dark">
-          Cantumkan alamat email untuk verifikasi akun.
+          Masukkan nomor telepon yang terdaftar.
         </span>
       </div>
 
@@ -25,8 +25,8 @@
         <div>
           <input
             class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-woodsmoke-950 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in"
-            type="email"
-            placeholder="Email" />
+            type="text"
+            placeholder="Nomor Telepon" />
         </div>
 
         <!-- Button -->
@@ -34,21 +34,9 @@
           <button
             class="w-full font-medium py-2 tracking-tight rounded-sm cursor-pointer bg-woodsmoke-950 text-ink-base-light hover:bg-flamingo-500 transition-all duration-150 ease-in"
             type="submit">
-            Kirim
+            Verifikasi
           </button>
         </div>
-      </div>
-
-      <!-- Link -->
-      <div class="text-center tracking-tight">
-        <span class="text-base font-normal text-ink-muted-dark">
-          Ingat password anda?
-          <NuxtLink
-            class="font-medium text-ink-base-dark hover:underline underline-offset-2 transition-all duration-150 ease-in"
-            to="/autentikasi/login">
-            Kembali
-          </NuxtLink>
-        </span>
       </div>
 
       <!-- Error -->
