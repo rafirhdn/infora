@@ -1,133 +1,104 @@
 <script setup>
-import { BookOpen, Layers, Target, CheckCircle2 } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { Search, FileText, Download, Printer } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'waka'
 })
+
+const searchQuery = ref('')
+
+const raporData = [
+  { id: 1, nis: '20231001', nama: 'Andi Saputra', kelas: 'X RPL A', status: 'Selesai' },
+  { id: 2, nis: '20231002', nama: 'Bunga Lestari', kelas: 'X RPL A', status: 'Selesai' },
+  { id: 3, nis: '20231005', nama: 'Dimas Anggara', kelas: 'X RPL A', status: 'Belum' },
+]
 </script>
 
 <template>
   <div class="dashboard-page">
     <Header 
-      title="Dashboard Kurikulum" 
-      subtitle="Pantau struktur mata pelajaran dan progres pengisian nilai" 
+      title="Cetak Rapor Siswa" 
+      subtitle="Generate dan unduh dokumen rapor semester" 
       :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" 
     />
 
-    <!-- Ringkasan Kurikulum -->
-    <h2 class="section-title">Ringkasan Kurikulum</h2>
-    <div class="grid-cards mb-4">
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-primary">
-            <BookOpen :size="24" />
+    <div class="card mb-4" style="margin-bottom: 1.5rem">
+      <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px">
+          <label class="form-label">Cari Siswa (NIS / Nama)</label>
+          <div class="search-bar" style="width: 100%; border-radius: var(--radius-md);">
+            <Search :size="18" class="search-icon" />
+            <input type="text" placeholder="Masukkan NIS atau Nama Siswa" class="search-input" v-model="searchQuery" />
           </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Umum</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">14</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-warning">
-            <Layers :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Kejuruan</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">22</span>
-            <span class="stat-trend success">3 Jurusan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-success">
-            <Target :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Total KD</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">342</span>
-          </div>
+        <div style="width: 150px">
+          <label class="form-label">Pilih Kelas</label>
+          <select class="form-input">
+            <option>Semua Kelas</option>
+            <option>X RPL A</option>
+            <option>XI DKV B</option>
+          </select>
         </div>
       </div>
     </div>
 
-    <div class="dashboard-grid">
-      <!-- Status Pengisian Nilai -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Status Pengisian Nilai (Semester Ini)</h3>
-          <button class="btn btn-outline btn-sm">Lihat Rekap</button>
-        </div>
-        
-        <div class="activity-list">
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-success" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>X RPL</strong>: 90% nilai sudah diisi.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-success" style="width: 90%"></div></div>
-            </div>
-          </div>
-          
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-warning" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>PTS XI Animasi</strong>: 70% sudah selesai dikerjakan.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-warning" style="width: 70%"></div></div>
-            </div>
-          </div>
-
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-danger" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>XII DKV</strong>: Baru 30% nilai yang masuk.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-primary" style="width: 30%"></div></div>
-            </div>
-          </div>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Daftar Rapor Siswa</h3>
+        <button class="btn btn-outline btn-sm">
+          <Printer :size="16" /> Cetak Semua (Kelas Ini)
+        </button>
       </div>
 
-      <!-- Info Tambahan -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Distribusi Mapel Kejuruan</h3>
-        </div>
-        <div class="chart-placeholder">
-          <div class="bar-group">
-            <div class="bar-label">RPL</div>
-            <div class="bar-wrapper"><div class="bar fill-primary" style="width: 40%"></div></div>
-            <div class="bar-value">8</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">DKV</div>
-            <div class="bar-wrapper"><div class="bar fill-warning" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Animasi</div>
-            <div class="bar-wrapper"><div class="bar fill-success" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-        </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>NIS</th>
+              <th>Nama Siswa</th>
+              <th>Kelas</th>
+              <th>Status Pengisian Nilai</th>
+              <th>Aksi Rapor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in raporData" :key="item.id">
+              <td><strong>{{ item.nis }}</strong></td>
+              <td>{{ item.nama }}</td>
+              <td>{{ item.kelas }}</td>
+              <td>
+                <span :class="['badge', item.status === 'Selesai' ? 'badge-success' : 'badge-warning']">
+                  {{ item.status === 'Selesai' ? 'Lengkap' : 'Belum Lengkap' }}
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem">
+                  <button 
+                    class="btn btn-primary btn-sm" 
+                    style="padding: 0.4rem 0.75rem; font-size: 0.8rem"
+                    :disabled="item.status !== 'Selesai'"
+                    :style="item.status !== 'Selesai' ? { opacity: 0.5, cursor: 'not-allowed' } : {}"
+                  >
+                    <FileText :size="14" /> Generate PDF
+                  </button>
+                  <button 
+                    class="btn btn-outline btn-sm" 
+                    style="padding: 0.4rem 0.75rem; font-size: 0.8rem"
+                    :disabled="item.status !== 'Selesai'"
+                    :style="item.status !== 'Selesai' ? { opacity: 0.5, cursor: 'not-allowed' } : {}"
+                  >
+                    <Download :size="14" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--primary); } /* Using primary as danger to keep theme consistent, or explicit danger */
-</style>
 <style>
 :root {
   /* Colors - Premium Orange & White Theme */

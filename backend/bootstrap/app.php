@@ -22,6 +22,23 @@ return Application::configure(
     Middleware $middleware
 ): void {
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sanctum SPA Authentication
+    |--------------------------------------------------------------------------
+    |
+    | Biar Nuxt bisa login pakai session + cookie.
+    |
+    */
+
+    $middleware->statefulApi();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Middleware Alias
+    |--------------------------------------------------------------------------
+    */
+
     $middleware->alias([
 
         'role' =>
@@ -42,6 +59,7 @@ return Application::configure(
 ): void {
 
     //
+
 })
 
 ->create();

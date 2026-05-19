@@ -1,133 +1,144 @@
 <script setup>
-import { BookOpen, Layers, Target, CheckCircle2 } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { Plus, Edit2, Power } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'waka'
 })
+
+const initialMapel = [
+  { id: 1, nama: 'Pendidikan Agama Islam', kategori: 'Umum', jurusan: 'Semua', status: 'Aktif' },
+  { id: 2, nama: 'Bahasa Indonesia', kategori: 'Umum', jurusan: 'Semua', status: 'Aktif' },
+  { id: 3, nama: 'Pemrograman Web', kategori: 'Kejuruan', jurusan: 'RPL', status: 'Aktif' },
+  { id: 4, nama: 'Desain Grafis', kategori: 'Kejuruan', jurusan: 'DKV', status: 'Non-aktif' },
+]
+
+const mapelList = ref(initialMapel)
+const isModalOpen = ref(false)
+const modalMode = ref('add')
+const formData = ref({ nama: '', kategori: 'Umum', jurusan: 'Semua' })
+
+const handleOpenModal = (mode, data = null) => {
+  modalMode.value = mode
+  if (data) {
+    formData.value = { ...data }
+  } else {
+    formData.value = { nama: '', kategori: 'Umum', jurusan: 'Semua' }
+  }
+  isModalOpen.value = true
+}
+
+const handleToggleStatus = (id) => {
+  mapelList.value = mapelList.value.map(item => {
+    if (item.id === id) {
+      return { ...item, status: item.status === 'Aktif' ? 'Non-aktif' : 'Aktif' }
+    }
+    return item
+  })
+}
+
+const handleSubmit = () => {
+  isModalOpen.value = false
+}
 </script>
 
 <template>
   <div class="dashboard-page">
     <Header 
-      title="Dashboard Kurikulum" 
-      subtitle="Pantau struktur mata pelajaran dan progres pengisian nilai" 
+      title="Mata Pelajaran" 
+      subtitle="Kelola daftar mata pelajaran umum dan kejuruan" 
       :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" 
     />
 
-    <!-- Ringkasan Kurikulum -->
-    <h2 class="section-title">Ringkasan Kurikulum</h2>
-    <div class="grid-cards mb-4">
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-primary">
-            <BookOpen :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Umum</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">14</span>
-          </div>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Daftar Mata Pelajaran</h3>
+        <button class="btn btn-primary" @click="handleOpenModal('add')">
+          <Plus :size="18" />
+          Tambah Mapel
+        </button>
       </div>
 
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-warning">
-            <Layers :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Kejuruan</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">22</span>
-            <span class="stat-trend success">3 Jurusan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-success">
-            <Target :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Total KD</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">342</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="dashboard-grid">
-      <!-- Status Pengisian Nilai -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Status Pengisian Nilai (Semester Ini)</h3>
-          <button class="btn btn-outline btn-sm">Lihat Rekap</button>
-        </div>
-        
-        <div class="activity-list">
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-success" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>X RPL</strong>: 90% nilai sudah diisi.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-success" style="width: 90%"></div></div>
-            </div>
-          </div>
-          
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-warning" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>PTS XI Animasi</strong>: 70% sudah selesai dikerjakan.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-warning" style="width: 70%"></div></div>
-            </div>
-          </div>
-
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-danger" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>XII DKV</strong>: Baru 30% nilai yang masuk.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-primary" style="width: 30%"></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Info Tambahan -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Distribusi Mapel Kejuruan</h3>
-        </div>
-        <div class="chart-placeholder">
-          <div class="bar-group">
-            <div class="bar-label">RPL</div>
-            <div class="bar-wrapper"><div class="bar fill-primary" style="width: 40%"></div></div>
-            <div class="bar-value">8</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">DKV</div>
-            <div class="bar-wrapper"><div class="bar fill-warning" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Animasi</div>
-            <div class="bar-wrapper"><div class="bar fill-success" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-        </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Mata Pelajaran</th>
+              <th>Kategori</th>
+              <th>Jurusan</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in mapelList" :key="item.id">
+              <td>{{ index + 1 }}</td>
+              <td><strong>{{ item.nama }}</strong></td>
+              <td>{{ item.kategori }}</td>
+              <td>
+                <span v-if="item.jurusan === 'Semua'" class="badge badge-success">Semua Jurusan</span>
+                <span v-else class="badge badge-primary">{{ item.jurusan }}</span>
+              </td>
+              <td>
+                <span :class="['badge', item.status === 'Aktif' ? 'badge-success' : 'badge-danger']">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem">
+                  <button class="btn-icon" @click="handleOpenModal('edit', item)">
+                    <Edit2 :size="16" />
+                  </button>
+                  <button 
+                    :class="['btn-icon', item.status === 'Aktif' ? 'text-danger' : '']" 
+                    :title="item.status === 'Aktif' ? 'Non-aktifkan' : 'Aktifkan'"
+                    @click="handleToggleStatus(item.id)"
+                  >
+                    <Power :size="16" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+    <Modal 
+      :isOpen="isModalOpen" 
+      @close="isModalOpen = false" 
+      :title="modalMode === 'add' ? 'Tambah Mata Pelajaran' : 'Edit Mata Pelajaran'"
+    >
+      <form @submit.prevent="handleSubmit">
+        <div class="form-group">
+          <label class="form-label">Nama Mata Pelajaran</label>
+          <input type="text" class="form-input" v-model="formData.nama" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kategori</label>
+          <select class="form-input" v-model="formData.kategori">
+            <option value="Umum">Umum (A/B)</option>
+            <option value="Kejuruan">Kejuruan (C)</option>
+          </select>
+        </div>
+        <div class="form-group" v-if="formData.kategori === 'Kejuruan'">
+          <label class="form-label">Jurusan Spesifik</label>
+          <select class="form-input" v-model="formData.jurusan">
+            <option value="RPL">RPL</option>
+            <option value="DKV">DKV</option>
+            <option value="Animasi">Animasi</option>
+            <option value="Semua">Semua Kejuruan</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" @click="isModalOpen = false">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
-
-<style scoped>
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--primary); } /* Using primary as danger to keep theme consistent, or explicit danger */
-</style>
 <style>
 :root {
   /* Colors - Premium Orange & White Theme */

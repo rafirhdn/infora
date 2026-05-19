@@ -1,13 +1,17 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
 
-  // Modules
-  modules: ["@nuxt/fonts", "@nuxt/image", "@nuxt/ui", "@nuxt/icon"],
+  modules: [
+    "@nuxt/fonts",
+    "@nuxt/image",
+    "@nuxt/ui",
+    "@nuxt/icon",
+  ],
 
-  // Devtools
-  devtools: { enabled: true },
+  devtools: {
+    enabled: true,
+  },
 
-  // Fonts
   fonts: {
     families: [
       { name: "DM Sans", provider: "google" },
@@ -15,16 +19,15 @@ export default defineNuxtConfig({
     ],
   },
 
-  // UI
   css: [
     "./app/assets/css/main.css",
     "@fortawesome/fontawesome-svg-core/styles.css",
   ],
+
   features: {
     inlineStyles: true,
   },
 
-  // Components
   components: [
     {
       path: "~/components",
@@ -32,11 +35,10 @@ export default defineNuxtConfig({
     },
   ],
 
-  // Api
   runtimeConfig: {
     public: {
-      apiKey: "",
-      baseKey: "",
+      apiKey: import.meta.env.NUXT_PUBLIC_API_KEY,
+      baseKey: import.meta.env.NUXT_PUBLIC_BASE_KEY,
     },
   },
 });

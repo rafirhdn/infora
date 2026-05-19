@@ -1,133 +1,128 @@
 <script setup>
-import { BookOpen, Layers, Target, CheckCircle2 } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { Filter, Download, ChevronRight } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'waka'
+})
+
+const activeTab = ref('kelas') // 'kelas' or 'mapel'
+
+const reportDataKelas = [
+  { id: 1, label: 'X RPL A', rata: 82.5, tuntas: 85, tidakTuntas: 15 },
+  { id: 2, label: 'XI DKV B', rata: 78.0, tuntas: 60, tidakTuntas: 40 },
+  { id: 3, label: 'XII Animasi C', rata: 88.5, tuntas: 95, tidakTuntas: 5 },
+]
+
+const reportDataMapel = [
+  { id: 1, label: 'Pemrograman Web', rata: 80.5, tuntas: 75, tidakTuntas: 25 },
+  { id: 2, label: 'Desain Grafis', rata: 85.0, tuntas: 90, tidakTuntas: 10 },
+  { id: 3, label: 'Bahasa Indonesia', rata: 75.5, tuntas: 65, tidakTuntas: 35 },
+]
+
+const currentData = computed(() => {
+  return activeTab.value === 'kelas' ? reportDataKelas : reportDataMapel
 })
 </script>
 
 <template>
   <div class="dashboard-page">
     <Header 
-      title="Dashboard Kurikulum" 
-      subtitle="Pantau struktur mata pelajaran dan progres pengisian nilai" 
+      title="Laporan & Rekap Nilai" 
+      subtitle="Pantau pencapaian akademik siswa per kelas dan mapel" 
       :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" 
     />
 
-    <!-- Ringkasan Kurikulum -->
-    <h2 class="section-title">Ringkasan Kurikulum</h2>
-    <div class="grid-cards mb-4">
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-primary">
-            <BookOpen :size="24" />
-          </div>
+    <!-- Filter Section -->
+    <div class="card mb-4" style="margin-bottom: 1.5rem">
+      <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 150px">
+          <label class="form-label">Tahun Ajaran / Semester</label>
+          <select class="form-input">
+            <option>2026/2027 Ganjil</option>
+            <option>2025/2026 Genap</option>
+          </select>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Umum</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">14</span>
-          </div>
+        <div style="flex: 1; min-width: 150px">
+          <label class="form-label">Jurusan</label>
+          <select class="form-input">
+            <option>Semua Jurusan</option>
+            <option>RPL</option>
+            <option>DKV</option>
+            <option>Animasi</option>
+          </select>
         </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-warning">
-            <Layers :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Kejuruan</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">22</span>
-            <span class="stat-trend success">3 Jurusan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-success">
-            <Target :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Total KD</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">342</span>
-          </div>
-        </div>
+        <button class="btn btn-primary" style="height: 42px">
+          <Filter :size="18" /> Terapkan Filter
+        </button>
       </div>
     </div>
 
-    <div class="dashboard-grid">
-      <!-- Status Pengisian Nilai -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Status Pengisian Nilai (Semester Ini)</h3>
-          <button class="btn btn-outline btn-sm">Lihat Rekap</button>
-        </div>
-        
-        <div class="activity-list">
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-success" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>X RPL</strong>: 90% nilai sudah diisi.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-success" style="width: 90%"></div></div>
-            </div>
-          </div>
-          
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-warning" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>PTS XI Animasi</strong>: 70% sudah selesai dikerjakan.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-warning" style="width: 70%"></div></div>
-            </div>
-          </div>
+    <!-- Tabs -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem">
+      <button 
+        :class="['btn', activeTab === 'kelas' ? 'btn-primary' : 'btn-outline']"
+        @click="activeTab = 'kelas'"
+      >
+        Laporan per Kelas
+      </button>
+      <button 
+        :class="['btn', activeTab === 'mapel' ? 'btn-primary' : 'btn-outline']"
+        @click="activeTab = 'mapel'"
+      >
+        Laporan per Mapel
+      </button>
+    </div>
 
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-danger" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>XII DKV</strong>: Baru 30% nilai yang masuk.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-primary" style="width: 30%"></div></div>
-            </div>
-          </div>
-        </div>
+    <!-- Content -->
+    <div class="card">
+      <div class="card-header">
+        <h3>{{ activeTab === 'kelas' ? 'Rekapitulasi Rata-Rata Kelas' : 'Rekapitulasi Rata-Rata Mapel' }}</h3>
+        <button class="btn btn-outline btn-sm">
+          <Download :size="16" /> Export Excel
+        </button>
       </div>
 
-      <!-- Info Tambahan -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Distribusi Mapel Kejuruan</h3>
-        </div>
-        <div class="chart-placeholder">
-          <div class="bar-group">
-            <div class="bar-label">RPL</div>
-            <div class="bar-wrapper"><div class="bar fill-primary" style="width: 40%"></div></div>
-            <div class="bar-value">8</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">DKV</div>
-            <div class="bar-wrapper"><div class="bar fill-warning" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Animasi</div>
-            <div class="bar-wrapper"><div class="bar fill-success" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-        </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ activeTab === 'kelas' ? 'Nama Kelas' : 'Mata Pelajaran' }}</th>
+              <th>Rata-Rata Nilai</th>
+              <th>Persentase Tuntas KKM</th>
+              <th>Belum Tuntas</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in currentData" :key="item.id">
+              <td><strong>{{ item.label }}</strong></td>
+              <td>
+                <span style="font-size: 1.1rem; font-weight: 600">{{ item.rata }}</span>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.5rem">
+                  <div class="bar-wrapper" style="flex: 1; width: 100px; height: 8px">
+                    <div class="bar fill-success" :style="{ width: item.tuntas + '%' }"></div>
+                  </div>
+                  <span style="font-size: 0.85rem">{{ item.tuntas }}%</span>
+                </div>
+              </td>
+              <td>
+                <span class="text-danger">{{ item.tidakTuntas }}% ({{ Math.floor(item.tidakTuntas/100 * 36) }} Siswa)</span>
+              </td>
+              <td>
+                <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.75rem">
+                  Detail <ChevronRight :size="14" />
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--primary); } /* Using primary as danger to keep theme consistent, or explicit danger */
-</style>
 <style>
 :root {
   /* Colors - Premium Orange & White Theme */

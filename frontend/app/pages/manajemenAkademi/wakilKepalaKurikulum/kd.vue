@@ -1,133 +1,142 @@
 <script setup>
-import { BookOpen, Layers, Target, CheckCircle2 } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { Plus, Edit2, Trash2, Filter } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'waka'
 })
+
+const selectedMapel = ref('Pemrograman Web')
+
+const initialKD = [
+  { id: 1, kode: '3.1', judul: 'Memahami Konsep Web Server', deskripsi: 'Memahami arsitektur dasar dan cara kerja web server secara umum.', bobot: 2 },
+  { id: 2, kode: '4.1', judul: 'Menyajikan Konsep Web Server', deskripsi: 'Mempresentasikan hasil pemahaman mengenai web server.', bobot: 3 },
+  { id: 3, kode: '3.2', judul: 'Menerapkan HTML Dasar', deskripsi: 'Menerapkan tag-tag dasar HTML untuk struktur halaman web.', bobot: 3 },
+  { id: 4, kode: '4.2', judul: 'Membuat Halaman HTML', deskripsi: 'Membuat halaman web statis menggunakan HTML dasar.', bobot: 4 },
+]
+
+const kdList = ref(initialKD)
+const isModalOpen = ref(false)
+const modalMode = ref('add')
+const formData = ref({ kode: '', judul: '', deskripsi: '', bobot: 1 })
+
+const handleOpenModal = (mode, data = null) => {
+  modalMode.value = mode
+  if (data) {
+    formData.value = { ...data }
+  } else {
+    formData.value = { kode: '', judul: '', deskripsi: '', bobot: 1 }
+  }
+  isModalOpen.value = true
+}
+
+const handleSubmit = () => {
+  isModalOpen.value = false
+}
 </script>
 
 <template>
   <div class="dashboard-page">
     <Header 
-      title="Dashboard Kurikulum" 
-      subtitle="Pantau struktur mata pelajaran dan progres pengisian nilai" 
+      title="Kompetensi Dasar (KD)" 
+      subtitle="Kelola standar kompetensi per mata pelajaran" 
       :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" 
     />
 
-    <!-- Ringkasan Kurikulum -->
-    <h2 class="section-title">Ringkasan Kurikulum</h2>
-    <div class="grid-cards mb-4">
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-primary">
-            <BookOpen :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Umum</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">14</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-warning">
-            <Layers :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Kejuruan</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">22</span>
-            <span class="stat-trend success">3 Jurusan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-success">
-            <Target :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Total KD</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">342</span>
-          </div>
+    <div class="card mb-4" style="margin-bottom: 1.5rem">
+      <div style="display: flex; gap: 1rem; align-items: center">
+        <Filter class="text-muted" :size="20" />
+        <div style="flex: 1">
+          <label class="form-label" style="margin-bottom: 0.25rem">Pilih Mata Pelajaran</label>
+          <select class="form-input" v-model="selectedMapel">
+            <option value="Pemrograman Web">Pemrograman Web (RPL)</option>
+            <option value="Desain Grafis">Desain Grafis (DKV)</option>
+            <option value="Bahasa Indonesia">Bahasa Indonesia (Umum)</option>
+          </select>
         </div>
       </div>
     </div>
 
-    <div class="dashboard-grid">
-      <!-- Status Pengisian Nilai -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Status Pengisian Nilai (Semester Ini)</h3>
-          <button class="btn btn-outline btn-sm">Lihat Rekap</button>
-        </div>
-        
-        <div class="activity-list">
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-success" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>X RPL</strong>: 90% nilai sudah diisi.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-success" style="width: 90%"></div></div>
-            </div>
-          </div>
-          
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-warning" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>PTS XI Animasi</strong>: 70% sudah selesai dikerjakan.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-warning" style="width: 70%"></div></div>
-            </div>
-          </div>
-
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-danger" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>XII DKV</strong>: Baru 30% nilai yang masuk.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-primary" style="width: 30%"></div></div>
-            </div>
-          </div>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Daftar KD: {{ selectedMapel }}</h3>
+        <button class="btn btn-primary" @click="handleOpenModal('add')">
+          <Plus :size="18" />
+          Tambah KD
+        </button>
       </div>
 
-      <!-- Info Tambahan -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Distribusi Mapel Kejuruan</h3>
-        </div>
-        <div class="chart-placeholder">
-          <div class="bar-group">
-            <div class="bar-label">RPL</div>
-            <div class="bar-wrapper"><div class="bar fill-primary" style="width: 40%"></div></div>
-            <div class="bar-value">8</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">DKV</div>
-            <div class="bar-wrapper"><div class="bar fill-warning" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Animasi</div>
-            <div class="bar-wrapper"><div class="bar fill-success" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-        </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Judul Kompetensi</th>
+              <th>Deskripsi Singkat</th>
+              <th>Bobot</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in kdList" :key="item.id">
+              <td><strong>{{ item.kode }}</strong></td>
+              <td>{{ item.judul }}</td>
+              <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ item.deskripsi }}
+              </td>
+              <td>
+                <div style="display: flex; gap: 2px">
+                  <span v-for="n in 5" :key="n" :style="{ color: n <= item.bobot ? 'var(--warning)' : 'var(--border)' }">★</span>
+                </div>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem">
+                  <button class="btn-icon" @click="handleOpenModal('edit', item)">
+                    <Edit2 :size="16" />
+                  </button>
+                  <button class="btn-icon text-danger">
+                    <Trash2 :size="16" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+    <Modal 
+      :isOpen="isModalOpen" 
+      @close="isModalOpen = false" 
+      :title="modalMode === 'add' ? 'Tambah KD Baru' : 'Edit KD'"
+    >
+      <form @submit.prevent="handleSubmit">
+        <div class="form-group" style="display: flex; gap: 1rem">
+          <div style="flex: 1">
+            <label class="form-label">Kode KD</label>
+            <input type="text" class="form-input" placeholder="Misal: 3.1" v-model="formData.kode" required />
+          </div>
+          <div style="flex: 2">
+            <label class="form-label">Bobot Penilaian (1-5)</label>
+            <input type="number" min="1" max="5" class="form-input" v-model="formData.bobot" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Judul Kompetensi</label>
+          <input type="text" class="form-input" placeholder="Menerapkan struktur HTML dasar" v-model="formData.judul" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi / Indikator Pencapaian</label>
+          <textarea class="form-input" rows="3" v-model="formData.deskripsi" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" @click="isModalOpen = false">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
-
-<style scoped>
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--primary); } /* Using primary as danger to keep theme consistent, or explicit danger */
-</style>
 <style>
 :root {
   /* Colors - Premium Orange & White Theme */

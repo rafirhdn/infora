@@ -1,133 +1,37 @@
 <script setup>
-import { BookOpen, Layers, Target, CheckCircle2 } from 'lucide-vue-next'
-
-definePageMeta({
-  layout: 'waka'
-})
+import { User, Mail, Phone, Shield } from 'lucide-vue-next'
+definePageMeta({ layout: 'waka' })
 </script>
 
 <template>
   <div class="dashboard-page">
-    <Header 
-      title="Dashboard Kurikulum" 
-      subtitle="Pantau struktur mata pelajaran dan progres pengisian nilai" 
-      :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" 
-    />
-
-    <!-- Ringkasan Kurikulum -->
-    <h2 class="section-title">Ringkasan Kurikulum</h2>
-    <div class="grid-cards mb-4">
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-primary">
-            <BookOpen :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Umum</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">14</span>
-          </div>
-        </div>
+    <Header title="Profil Saya" subtitle="Kelola informasi akun Anda" :profile="{ name: 'Waka Kurikulum', role: 'Waka Kurikulum' }" />
+    <div class="card" style="max-width: 600px; margin: 0 auto">
+      <div style="text-align: center; margin-bottom: 2rem">
+        <img src="https://ui-avatars.com/api/?name=Waka+Kurikulum&background=FF6A3D&color=fff&size=100" alt="Profile" style="border-radius: 50%; border: 4px solid var(--primary-light)" />
+        <h2 style="margin-top: 1rem; color: var(--secondary)">Waka Kurikulum</h2>
+        <p class="text-muted">ID: WK-2026002</p>
       </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-warning">
-            <Layers :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Mapel Kejuruan</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">22</span>
-            <span class="stat-trend success">3 Jurusan</span>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label"><Mail :size="16" style="vertical-align: middle; margin-right: 5px"/> Email</label>
+        <input type="email" class="form-input" value="waka@sekolah.id" disabled />
       </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon bg-success">
-            <Target :size="24" />
-          </div>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Total KD</h3>
-          <div class="stat-value-group">
-            <span class="stat-value">342</span>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label"><Phone :size="16" style="vertical-align: middle; margin-right: 5px"/> Nomor Telepon</label>
+        <input type="text" class="form-input" value="081987654321" />
       </div>
-    </div>
-
-    <div class="dashboard-grid">
-      <!-- Status Pengisian Nilai -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Status Pengisian Nilai (Semester Ini)</h3>
-          <button class="btn btn-outline btn-sm">Lihat Rekap</button>
-        </div>
-        
-        <div class="activity-list">
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-success" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>X RPL</strong>: 90% nilai sudah diisi.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-success" style="width: 90%"></div></div>
-            </div>
-          </div>
-          
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-warning" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>PTS XI Animasi</strong>: 70% sudah selesai dikerjakan.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-warning" style="width: 70%"></div></div>
-            </div>
-          </div>
-
-          <div class="activity-item" style="align-items: center">
-            <CheckCircle2 class="text-danger" :size="20" />
-            <div class="activity-content" style="flex: 1">
-              <p><strong>XII DKV</strong>: Baru 30% nilai yang masuk.</p>
-              <div class="bar-wrapper" style="margin-top: 0.5rem"><div class="bar fill-primary" style="width: 30%"></div></div>
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label"><Shield :size="16" style="vertical-align: middle; margin-right: 5px"/> Role / Peran</label>
+        <input type="text" class="form-input" value="Wakil Kepala Sekolah Bid. Kurikulum" disabled />
       </div>
-
-      <!-- Info Tambahan -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Distribusi Mapel Kejuruan</h3>
-        </div>
-        <div class="chart-placeholder">
-          <div class="bar-group">
-            <div class="bar-label">RPL</div>
-            <div class="bar-wrapper"><div class="bar fill-primary" style="width: 40%"></div></div>
-            <div class="bar-value">8</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">DKV</div>
-            <div class="bar-wrapper"><div class="bar fill-warning" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Animasi</div>
-            <div class="bar-wrapper"><div class="bar fill-success" style="width: 35%"></div></div>
-            <div class="bar-value">7</div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Password Baru (Kosongkan jika tidak diubah)</label>
+        <input type="password" class="form-input" placeholder="••••••••" />
       </div>
+      <button class="btn btn-primary" style="width: 100%; margin-top: 1rem">Simpan Perubahan</button>
     </div>
   </div>
 </template>
-
-<style scoped>
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--primary); } /* Using primary as danger to keep theme consistent, or explicit danger */
-</style>
 <style>
 :root {
   /* Colors - Premium Orange & White Theme */
