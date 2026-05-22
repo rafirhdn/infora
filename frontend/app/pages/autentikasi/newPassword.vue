@@ -1,12 +1,11 @@
 <script setup lang="ts">
-  // Layout halaman
+  // Layout page
   definePageMeta({
     layout: 'authentication'
   })
 
-  // Mengubah icon mata pada kata sandi baru
+  // Toggle icon
   const showNewPassword = ref(false)
-  // Mengubah icon mata pada kata sandi ulang
   const showNewPasswordAgain = ref(false)
 </script>
 
@@ -29,7 +28,7 @@
         <!-- Input Box -->
         <div class="relative w-sm">
           <input
-            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-woodsmoke-950 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in"
+            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-flamingo-500 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in-out"
             :type="showNewPassword ? 'text' : 'password'"
             placeholder="Kata Sandi Baru" />
           <Icon
@@ -41,7 +40,7 @@
         <!-- Input Box -->
         <div class="relative w-sm">
           <input
-            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-woodsmoke-950 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in"
+            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-flamingo-500 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in-out"
             :type="showNewPasswordAgain ? 'text' : 'password'"
             placeholder="Kata Sandi Ulang" />
           <Icon
@@ -55,7 +54,7 @@
         <!-- Button -->
         <div>
           <button
-            class="w-full font-medium py-2 tracking-tight rounded-sm cursor-pointer bg-woodsmoke-950 text-ink-base-light hover:bg-flamingo-500 transition-all duration-150 ease-in"
+            class="w-full font-medium py-2 tracking-tight rounded-sm cursor-pointer bg-flamingo-500 text-ink-base-light hover:bg-flamingo-600 transition-all duration-150 ease-in-out"
             type="submit">
             Perbarui
           </button>
