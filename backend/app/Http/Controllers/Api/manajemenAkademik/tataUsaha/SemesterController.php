@@ -44,11 +44,19 @@ class SemesterController extends Controller
             'status' => 'sometimes|required|in:aktif,nonaktif'
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | JIKA STATUS DIUBAH MENJADI AKTIF
+        |--------------------------------------------------------------------------
+        | Maka semester lain otomatis jadi nonaktif
+        */
+
         if (
             isset($validated['status']) &&
             $validated['status'] === 'aktif'
         ) {
             Semester::where('status', 'aktif')
+                ->where('id_semester', '!=', $semester->id_semester)
                 ->update([
                     'status' => 'nonaktif'
                 ]);
@@ -61,6 +69,18 @@ class SemesterController extends Controller
 
     public function destroy(Semester $semester)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | CEGAH HAPUS SEMESTER AKTIF
+        |--------------------------------------------------------------------------
+        */
+
+        if ($semester->status === 'aktif') {
+            return response()->json([
+                'message' => 'Semester aktif tidak dapat dihapus'
+            ], 403);
+        }
+
         $semester->delete();
 
         return response()->json([

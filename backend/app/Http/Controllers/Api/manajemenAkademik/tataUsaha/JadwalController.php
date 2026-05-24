@@ -12,52 +12,45 @@ class JadwalController extends Controller
     {
         $query = Jadwal::with([
             'kelas.jurusan',
-            'mataPelajaran',
             'guru',
+            'mataPelajaran',
             'semester'
         ]);
 
-        if ($request->filled('id_kelas')) {
-            $query->where(
-                'id_kelas',
-                $request->id_kelas
-            );
-        }
+        $query->when(
+            $request->filled('id_kelas'),
+            fn($q) =>
+            $q->where('id_kelas', $request->id_kelas)
+        );
 
-        if ($request->filled('id_guru')) {
-            $query->where(
-                'id_guru',
-                $request->id_guru
-            );
-        }
+        $query->when(
+            $request->filled('id_guru'),
+            fn($q) =>
+            $q->where('id_guru', $request->id_guru)
+        );
 
-        if ($request->filled('id_semester')) {
-            $query->where(
-                'id_semester',
-                $request->id_semester
-            );
-        }
+        $query->when(
+            $request->filled('id_mata_pelajaran'),
+            fn($q) =>
+            $q->where('id_mata_pelajaran', $request->id_mata_pelajaran)
+        );
 
-        if ($request->filled('hari')) {
-            $query->where(
-                'hari',
-                $request->hari
-            );
-        }
+        $query->when(
+            $request->filled('id_semester'),
+            fn($q) =>
+            $q->where('id_semester', $request->id_semester)
+        );
+
+        $query->when(
+            $request->filled('hari'),
+            fn($q) =>
+            $q->where('hari', $request->hari)
+        );
 
         $jadwal = $query
-            ->orderByRaw("
-                FIELD(
-                    hari,
-                    'senin',
-                    'selasa',
-                    'rabu',
-                    'kamis',
-                    'jumat'
-                )
-            ")
+            ->orderByRaw("FIELD(hari,'senin','selasa','rabu','kamis','jumat')")
             ->orderBy('jam_mulai')
-            ->get();
+            ->paginate(10);
 
         return response()->json([
             'success' => true,
@@ -65,189 +58,159 @@ class JadwalController extends Controller
         ]);
     }
 
+    private function validationRules($isUpdate = false)
+    {
+        $req = $isUpdate ? 'sometimes|required' : 'required';
+
+        return [
+            'hari' => $req . '|in:senin,selasa,rabu,kamis,jumat',
+            'jam_mulai' => $req . '|date_format:H:i',
+            'jam_selesai' => $req . '|date_format:H:i|after:jam_mulai',
+            'ruang' => 'nullable|string|max:30',
+
+            'id_kelas' => $req . '|exists:kelas,id_kelas',
+            'id_guru' => $req . '|exists:guru,id_guru',
+            'id_mata_pelajaran' => $req . '|exists:mata_pelajaran,id_mata_pelajaran',
+            'id_semester' => $req . '|exists:semester,id_semester',
+        ];
+    }
+
+    /*
+    |-----------------------------------------
+    | BENTROK UMUM (kelas / mapel / semester)
+    |-----------------------------------------
+    */
+    private function checkBentrok(array $data, $excludeId = null)
+    {
+        return Jadwal::where('hari', $data['hari'])
+            ->where('id_semester', $data['id_semester'])
+            ->where(function ($q) use ($data) {
+                $q->where('jam_mulai', '<', $data['jam_selesai'])
+                    ->where('jam_selesai', '>', $data['jam_mulai']);
+            })
+            ->when(
+                $excludeId,
+                fn($q) =>
+                $q->where('id_jadwal', '!=', $excludeId)
+            );
+    }
+
+    /*
+    |-----------------------------------------
+    | BENTROK KHUSUS GURU (IMPORTANT RULE)
+    |-----------------------------------------
+    */
+    private function checkBentrokGuru(array $data, $excludeId = null)
+    {
+        return Jadwal::where('id_guru', $data['id_guru'])
+            ->where('hari', $data['hari'])
+            ->where(function ($q) use ($data) {
+                $q->where('jam_mulai', '<', $data['jam_selesai'])
+                    ->where('jam_selesai', '>', $data['jam_mulai']);
+            })
+            ->when(
+                $excludeId,
+                fn($q) =>
+                $q->where('id_jadwal', '!=', $excludeId)
+            );
+    }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'hari' =>
-                'required|in:senin,selasa,rabu,kamis,jumat',
+        $validated = $request->validate($this->validationRules());
 
-            'jam_mulai' =>
-                'required',
-
-            'jam_selesai' =>
-                'required|after:jam_mulai',
-
-            'ruang' =>
-                'nullable|string|max:30',
-
-            'id_kelas' =>
-                'required|exists:kelas,id_kelas',
-
-            'id_mata_pelajaran' =>
-                'required|exists:mata_pelajaran,id_mata_pelajaran',
-
-            'id_guru' =>
-                'required|exists:guru,id_guru',
-
-            'id_semester' =>
-                'required|exists:semester,id_semester'
-        ]);
-
-        $bentrokKelas = Jadwal::where(
-            'id_kelas',
-            $validated['id_kelas']
-        )
-        ->where('hari', $validated['hari'])
-        ->where('id_semester', $validated['id_semester'])
-        ->where(function ($query) use ($validated) {
-            $query
-                ->whereBetween(
-                    'jam_mulai',
-                    [
-                        $validated['jam_mulai'],
-                        $validated['jam_selesai']
-                    ]
-                )
-                ->orWhereBetween(
-                    'jam_selesai',
-                    [
-                        $validated['jam_mulai'],
-                        $validated['jam_selesai']
-                    ]
-                );
-        })
-        ->exists();
-
-        if ($bentrokKelas) {
+        // CEK BENTROK KELAS
+        if ((clone $this->checkBentrok($validated))
+            ->where('id_kelas', $validated['id_kelas'])
+            ->exists()
+        ) {
             return response()->json([
                 'success' => false,
                 'message' => 'Jadwal kelas bentrok'
             ], 422);
         }
 
-        $bentrokGuru = Jadwal::where(
-            'id_guru',
-            $validated['id_guru']
-        )
-        ->where('hari', $validated['hari'])
-        ->where('id_semester', $validated['id_semester'])
-        ->where(function ($query) use ($validated) {
-            $query
-                ->whereBetween(
-                    'jam_mulai',
-                    [
-                        $validated['jam_mulai'],
-                        $validated['jam_selesai']
-                    ]
-                )
-                ->orWhereBetween(
-                    'jam_selesai',
-                    [
-                        $validated['jam_mulai'],
-                        $validated['jam_selesai']
-                    ]
-                );
-        })
-        ->exists();
-
-        if ($bentrokGuru) {
+        // CEK BENTROK GURU (RULE UTAMA)
+        if ($this->checkBentrokGuru($validated)->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Jadwal guru bentrok'
+                'message' => 'Guru sudah memiliki jadwal di waktu tersebut'
             ], 422);
         }
 
-        $jadwal = Jadwal::create(
-            $validated
-        );
+        $jadwal = Jadwal::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' =>
-                'Jadwal berhasil ditambahkan',
-            'data' =>
-                $jadwal->load([
-                    'kelas',
-                    'mataPelajaran',
-                    'guru',
-                    'semester'
-                ])
+            'message' => 'Jadwal berhasil ditambahkan',
+            'data' => $jadwal->load([
+                'kelas.jurusan',
+                'guru',
+                'mataPelajaran',
+                'semester'
+            ])
         ], 201);
     }
 
-    public function show(
-        Jadwal $jadwal
-    ) {
+    public function show(Jadwal $jadwal)
+    {
         return response()->json([
             'success' => true,
             'data' => $jadwal->load([
                 'kelas.jurusan',
-                'mataPelajaran',
                 'guru',
+                'mataPelajaran',
                 'semester'
             ])
         ]);
     }
 
-    public function update(
-        Request $request,
-        Jadwal $jadwal
-    ) {
-        $validated = $request->validate([
-            'hari' =>
-                'sometimes|required|in:senin,selasa,rabu,kamis,jumat',
+    public function update(Request $request, Jadwal $jadwal)
+    {
+        $validated = $request->validate($this->validationRules(true));
 
-            'jam_mulai' =>
-                'sometimes|required',
+        $data = array_merge($jadwal->toArray(), $validated);
 
-            'jam_selesai' =>
-                'sometimes|required',
+        // CEK BENTROK KELAS
+        if ((clone $this->checkBentrok($data, $jadwal->id_jadwal))
+            ->where('id_kelas', $data['id_kelas'])
+            ->exists()
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jadwal kelas bentrok'
+            ], 422);
+        }
 
-            'ruang' =>
-                'nullable|string|max:30',
+        // CEK BENTROK GURU
+        if ($this->checkBentrokGuru($data, $jadwal->id_jadwal)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Guru sudah memiliki jadwal di waktu tersebut'
+            ], 422);
+        }
 
-            'id_kelas' =>
-                'sometimes|required|exists:kelas,id_kelas',
-
-            'id_mata_pelajaran' =>
-                'sometimes|required|exists:mata_pelajaran,id_mata_pelajaran',
-
-            'id_guru' =>
-                'sometimes|required|exists:guru,id_guru',
-
-            'id_semester' =>
-                'sometimes|required|exists:semester,id_semester'
-        ]);
-
-        $jadwal->update(
-            $validated
-        );
+        $jadwal->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' =>
-                'Jadwal berhasil diupdate',
-            'data' =>
-                $jadwal
-                    ->fresh()
-                    ->load([
-                        'kelas',
-                        'mataPelajaran',
-                        'guru',
-                        'semester'
-                    ])
+            'message' => 'Jadwal berhasil diupdate',
+            'data' => $jadwal->fresh()->load([
+                'kelas.jurusan',
+                'guru',
+                'mataPelajaran',
+                'semester'
+            ])
         ]);
     }
 
-    public function destroy(
-        Jadwal $jadwal
-    ) {
+    public function destroy(Jadwal $jadwal)
+    {
         $jadwal->delete();
 
         return response()->json([
             'success' => true,
-            'message' =>
-                'Jadwal berhasil dihapus'
+            'message' => 'Jadwal berhasil dihapus'
         ]);
     }
 }

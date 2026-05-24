@@ -16,8 +16,8 @@ class SiswaController extends Controller
             'akun',
             'kelas.jurusan'
         ])
-        ->orderBy('nis')
-        ->get();
+            ->orderBy('nis')
+            ->get();
     }
 
     public function store(Request $request)
@@ -36,8 +36,8 @@ class SiswaController extends Controller
         $akun = Akun::create([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'siswa'
+            'kata_sandi' => Hash::make($validated['password']),
+            'peran' => 'siswa'
         ]);
 
         $siswa = Siswa::create([
@@ -80,8 +80,11 @@ class SiswaController extends Controller
 
         $siswa->update([
             'nama' => $validated['nama'] ?? $siswa->nama,
+
             'nis' => $validated['nis'] ?? $siswa->nis,
+
             'nomor' => $validated['nomor'] ?? $siswa->nomor,
+
             'id_kelas' => $validated['id_kelas'] ?? $siswa->id_kelas
         ]);
 

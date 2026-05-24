@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -16,25 +17,58 @@ import {
   Shield,
   Lock,
   Pencil,
-  X
+  X,
+  LogOut
 } from 'lucide-vue-next'
 
 definePageMeta({
-  layout: 'admin'
+  layout: false
 })
 
 /* =========================
    SIDEBAR MENU
 ========================= */
 const adminMenus = [
-  { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
-  { label: 'Jurusan', path: 'jurusan', icon: Building2 },
-  { label: 'Kelas', path: 'kelas', icon: BookOpen },
-  { label: 'Semester', path: 'semester', icon: Calendar },
-  { label: 'Guru', path: 'guru', icon: Users },
-  { label: 'Siswa', path: 'siswa', icon: GraduationCap },
-  { label: 'Jadwal', path: 'jadwal', icon: ClipboardList },
-  { label: 'Profil Saya', path: 'profile', icon: User }
+  {
+    label: 'Dashboard',
+    path: '/manajemenAkademi/tataUsaha/dashboard',
+    icon: LayoutDashboard
+  },
+  {
+    label: 'Jurusan',
+    path: '/manajemenAkademi/tataUsaha/jurusan',
+    icon: Building2
+  },
+  {
+    label: 'Kelas',
+    path: '/manajemenAkademi/tataUsaha/kelas',
+    icon: BookOpen
+  },
+  {
+    label: 'Semester',
+    path: '/manajemenAkademi/tataUsaha/semester',
+    icon: Calendar
+  },
+  {
+    label: 'Guru',
+    path: '/manajemenAkademi/tataUsaha/guru',
+    icon: Users
+  },
+  {
+    label: 'Siswa',
+    path: '/manajemenAkademi/tataUsaha/siswa',
+    icon: GraduationCap
+  },
+  {
+    label: 'Jadwal',
+    path: '/manajemenAkademi/tataUsaha/jadwal',
+    icon: ClipboardList
+  },
+  {
+    label: 'Profil Saya',
+    path: '/manajemenAkademi/tataUsaha/profile',
+    icon: User
+  }
 ]
 
 /* =========================
@@ -53,14 +87,55 @@ const closeEditModal = () => {
 
 <template>
   <div class="app-container">
-    <!-- Sidebar -->
-    <Sidebar role="Admin / TU" :menus="adminMenus" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <GraduationCap :size="28" />
+        </div>
 
-    <!-- Main Content -->
+        <h2 class="brand-name">EduManage</h2>
+      </div>
+
+      <div class="sidebar-role-badge">
+        <span class="badge badge-primary role-text">Admin / TU</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li
+            v-for="(menu, index) in adminMenus"
+            :key="index"
+          >
+            <NuxtLink
+              :to="menu.path"
+              class="nav-link"
+              active-class="active"
+            >
+              <component :is="menu.icon" :size="20" />
+
+              <span>
+                {{ menu.label }}
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout">
+          <LogOut :size="20" />
+
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
     <main class="main-content">
       <!-- HEADER -->
       <header class="top-header">
-        <div class="header-left">
+        <div>
           <h1 class="page-title">Profil Saya</h1>
 
           <p class="page-subtitle">
@@ -74,26 +149,28 @@ const closeEditModal = () => {
 
             <input
               type="text"
-              placeholder="Search anything..."
+              placeholder="Cari sesuatu..."
               class="search-input"
             />
           </div>
 
           <button class="notification-btn">
             <Bell :size="20" />
+
             <span class="notification-dot"></span>
           </button>
 
           <div class="profile-menu">
             <div class="profile-info">
               <span class="profile-name">Admin Utama</span>
+
               <span class="profile-role">Admin / TU</span>
             </div>
 
             <img
+              class="profile-avatar"
               src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
               alt="Profile"
-              class="profile-avatar"
             />
           </div>
         </div>
@@ -177,6 +254,7 @@ const closeEditModal = () => {
             @click="openEditModal"
           >
             <Pencil :size="18" />
+
             Simpan Perubahan
           </button>
         </div>
@@ -229,44 +307,33 @@ const closeEditModal = () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 :root {
-  --primary: #FF6A3D;
-  --primary-hover: #E85B31;
-  --primary-light: #FFF0EB;
+  --primary: #ff6a3d;
+  --primary-hover: #e85b31;
+  --primary-light: #fff0eb;
 
-  --secondary: #2C3E50;
+  --secondary: #2c3e50;
+
   --text-main: #334155;
-  --text-muted: #64748B;
+  --text-muted: #64748b;
 
-  --bg-app: #F8FAFC;
-  --bg-surface: #FFFFFF;
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
 
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
 
-  --border: #E2E8F0;
+  --border: #e2e8f0;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
-  --shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.15);
 
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius-md: 12px;
+  --radius-lg: 24px;
 
-  --shadow-orange:
-    0 10px 15px -3px rgba(255, 106, 61, 0.2);
-
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  --transition:
-    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.25s ease;
 }
 
 * {
@@ -276,108 +343,234 @@ const closeEditModal = () => {
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
   background: var(--bg-app);
-  color: var(--text-main);
+  font-family: sans-serif;
 }
 
-/* Layout */
+/* APP */
+
 .app-container {
   display: flex;
   min-height: 100vh;
 }
 
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  margin-left: 260px;
+/* SIDEBAR */
+
+.sidebar {
+  width: 260px;
+
+  background: white;
+
+  border-right: 1px solid var(--border);
+
+  position: fixed;
+  inset: 0 auto 0 0;
+
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 24px;
+}
+
+.logo-box {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--primary-light);
+
+  color: var(--primary);
+
+  border-radius: 12px;
+}
+
+.brand-name {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.sidebar-role-badge {
+  padding: 0 24px 20px;
+}
+
+.role-text {
+  font-size: 12px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0 16px;
+}
+
+.nav-list {
+  list-style: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  color: var(--text-muted);
+
+  text-decoration: none;
+
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  background: #f8fafc;
+  color: var(--primary);
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+.sidebar-footer {
+  padding: 24px;
+
+  border-top: 1px solid var(--border);
+}
+
+.btn-logout {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  border: none;
+
+  cursor: pointer;
+
+  color: var(--danger);
+
+  background: transparent;
+}
+
+.btn-logout:hover {
+  background: var(--danger-light);
+}
+
+/* MAIN */
+
+.main-content {
+  flex: 1;
+
+  margin-left: 260px;
+
+  padding: 32px;
+}
+
+/* HEADER */
+
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 32px;
+}
 
-  border-bottom: 1px solid var(--border);
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin-top: 4px;
+
+  color: var(--text-muted);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  color: var(--secondary);
-}
-
-.page-subtitle {
-  margin-top: 0.25rem;
-  color: var(--text-muted);
+  gap: 16px;
 }
 
 .search-bar {
+  width: 320px;
+
   display: flex;
   align-items: center;
 
-  width: 300px;
+  padding: 12px 16px;
 
-  background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: 999px;
 
-  padding: 0.5rem 1rem;
-}
-
-.search-icon {
-  margin-right: 0.5rem;
-  color: var(--text-muted);
+  background: white;
 }
 
 .search-input {
   width: 100%;
+
   border: none;
   outline: none;
+
   background: transparent;
+}
+
+.search-icon {
+  margin-right: 8px;
+
+  color: var(--text-muted);
 }
 
 .notification-btn {
   position: relative;
 
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
 
-  border-radius: 50%;
   border: 1px solid var(--border);
-
-  background: var(--bg-surface);
+  border-radius: 50%;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background: white;
 }
 
 .notification-dot {
   position: absolute;
-  top: 9px;
+
+  top: 10px;
   right: 10px;
 
   width: 8px;
   height: 8px;
 
-  background: var(--danger);
   border-radius: 50%;
+
+  background: red;
 }
 
 .profile-menu {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .profile-info {
@@ -391,33 +584,31 @@ body {
 }
 
 .profile-role {
-  font-size: 0.8rem;
+  font-size: 12px;
+
   color: var(--text-muted);
 }
 
 .profile-avatar {
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
+
   border-radius: 50%;
 }
 
-/* Card */
-.card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+/* CARD */
 
-  padding: 2rem;
+.card {
+  background: white;
+
+  border: 1px solid var(--border);
+  border-radius: 24px;
+
+  padding: 32px;
 
   box-shadow: var(--shadow-sm);
-  transition: var(--transition);
 }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* Profile */
 .profile-wrapper {
   display: flex;
   justify-content: center;
@@ -425,12 +616,12 @@ body {
 
 .profile-card {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
 }
 
 .profile-top {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 32px;
 }
 
 .profile-large-avatar {
@@ -438,85 +629,85 @@ body {
   height: 120px;
 
   border-radius: 50%;
+
   border: 4px solid var(--primary-light);
 }
 
 .profile-heading {
-  margin-top: 1rem;
-  color: var(--secondary);
+  margin-top: 16px;
+
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .profile-id {
-  margin-top: 0.4rem;
+  margin-top: 6px;
+
   color: var(--text-muted);
 }
 
-/* Form */
+/* FORM */
+
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 .form-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 
-  margin-bottom: 0.6rem;
+  margin-bottom: 8px;
 
-  font-size: 0.95rem;
-  font-weight: 500;
-
-  color: var(--secondary);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .form-input {
   width: 100%;
 
-  padding: 0.85rem 1rem;
+  padding: 14px 16px;
 
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
 
-  background: #F8FAFC;
+  background: #f8fafc;
+
+  outline: none;
 
   transition: var(--transition);
 }
 
 .form-input:focus {
-  outline: none;
-
   border-color: var(--primary);
 
   background: white;
 
-  box-shadow:
-    0 0 0 3px rgba(255, 106, 61, 0.1);
+  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.1);
 }
 
-/* Buttons */
+/* BUTTON */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
+
+  padding: 12px 18px;
 
   border: none;
+  border-radius: 12px;
+
   cursor: pointer;
-
-  padding: 0.8rem 1.4rem;
-
-  border-radius: var(--radius-md);
-
-  font-weight: 500;
 
   transition: var(--transition);
 }
 
 .btn-primary {
   background: var(--primary);
-  color: white;
 
-  box-shadow: var(--shadow-orange);
+  color: white;
 }
 
 .btn-primary:hover {
@@ -524,49 +715,45 @@ body {
 }
 
 .btn-outline {
-  background: white;
   border: 1px solid var(--border);
-}
 
-.btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  background: white;
 }
 
 .full-width {
   width: 100%;
 }
 
-/* Modal */
+/* MODAL */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
 
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(15, 23, 42, 0.55);
+
   backdrop-filter: blur(4px);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  z-index: 1000;
+  padding: 24px;
 
-  animation: fadeIn 0.3s ease;
+  z-index: 999;
 }
 
 .modal-content {
   width: 100%;
   max-width: 500px;
 
-  background: var(--bg-surface);
+  background: white;
 
-  border-radius: var(--radius-lg);
+  border-radius: 24px;
 
-  padding: 2rem;
+  padding: 32px;
 
   box-shadow: var(--shadow-lg);
-
-  animation: slideUp 0.3s ease;
 }
 
 .modal-header {
@@ -574,24 +761,32 @@ body {
   justify-content: space-between;
   align-items: center;
 
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
 }
 
 .modal-title {
-  font-size: 1.25rem;
-  color: var(--secondary);
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .modal-close-btn {
-  padding: 0.3rem;
-  border-radius: var(--radius-md);
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
 }
 
 .modal-close-btn:hover {
-  background: var(--bg-app);
+  background: #f1f5f9;
 }
 
 .modal-description {
@@ -602,49 +797,53 @@ body {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 12px;
 
-  margin-top: 2rem;
+  margin-top: 32px;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
+/* BADGE */
 
-  to {
-    opacity: 1;
-  }
+.badge {
+  display: inline-block;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
+.badge-primary {
+  background: var(--primary-light);
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: var(--primary);
 }
 
-/* Responsive */
+/* RESPONSIVE */
+
 @media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
   .main-content {
     margin-left: 0;
-    padding: 1rem;
+
+    padding: 20px;
   }
 
   .top-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+
+    gap: 20px;
   }
 
   .header-right {
     width: 100%;
+
     flex-wrap: wrap;
   }
 
@@ -652,12 +851,8 @@ body {
     width: 100%;
   }
 
-  .profile-card {
-    padding: 1.5rem;
-  }
-
   .modal-content {
-    margin: 1rem;
+    padding: 24px;
   }
 }
 </style>

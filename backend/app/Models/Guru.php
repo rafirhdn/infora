@@ -15,11 +15,16 @@ class Guru extends Model
     protected $fillable = [
         'nama',
         'nik',
-        'email',
         'nomor',
         'id_jurusan',
-        'id_akun'
+        'id_akun',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
 
     public function akun()
     {

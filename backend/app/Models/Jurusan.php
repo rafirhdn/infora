@@ -3,6 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Guru;
+use App\Models\Kelas;
+use App\Models\Siswa;
+use App\Models\MataPelajaran;
 
 class Jurusan extends Model
 {
@@ -18,15 +22,9 @@ class Jurusan extends Model
         'status'
     ];
 
-    public function kelas()
-    {
-        return $this->hasMany(
-            Kelas::class,
-            'id_jurusan',
-            'id_jurusan'
-        );
-    }
-
+    /**
+     * RELASI GURU
+     */
     public function guru()
     {
         return $this->hasMany(
@@ -36,6 +34,9 @@ class Jurusan extends Model
         );
     }
 
+    /**
+     * RELASI MATA PELAJARAN
+     */
     public function mataPelajaran()
     {
         return $this->hasMany(
@@ -43,5 +44,41 @@ class Jurusan extends Model
             'id_jurusan',
             'id_jurusan'
         );
+    }
+
+    /**
+     * RELASI KELAS
+     */
+    public function kelas()
+    {
+        return $this->hasMany(
+            Kelas::class,
+            'id_jurusan',
+            'id_jurusan'
+        );
+    }
+
+    /**
+     * RELASI SISWA
+     * Mengambil semua siswa dari seluruh kelas di jurusan ini
+     */
+    public function siswa()
+    {
+        return $this->hasManyThrough(
+            Siswa::class,
+            Kelas::class,
+            'id_jurusan', 
+            'id_kelas',   
+            'id_jurusan', 
+            'id_kelas'    
+        );
+    }
+
+    /**
+     * ROUTE MODEL BINDING
+     */
+    public function getRouteKeyName()
+    {
+        return 'id_jurusan';
     }
 }

@@ -20,7 +20,7 @@
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.7.1",
     "@tailwindcss/vite": "^4.2.2",
-    "axios": "^1.14.0",
+    "axios": "^1.16.1",
     "lucide-vue-next": "^1.0.0",
     "nuxt": "^4.4.2",
     "tailwindcss": "^4.2.2",

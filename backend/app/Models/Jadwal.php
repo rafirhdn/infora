@@ -18,10 +18,29 @@ class Jadwal extends Model
         'jam_selesai',
         'ruang',
         'id_kelas',
-        'id_mata_pelajaran',
         'id_guru',
+        'id_mata_pelajaran',
         'id_semester'
     ];
+
+    public const HARI = [
+        'senin',
+        'selasa',
+        'rabu',
+        'kamis',
+        'jumat'
+    ];
+
+    public function getRouteKeyName()
+    {
+        return 'id_jadwal';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
 
     public function kelas()
     {
@@ -32,21 +51,21 @@ class Jadwal extends Model
         );
     }
 
-    public function mataPelajaran()
-    {
-        return $this->belongsTo(
-            MataPelajaran::class,
-            'id_mata_pelajaran',
-            'id_mata_pelajaran'
-        );
-    }
-
     public function guru()
     {
         return $this->belongsTo(
             Guru::class,
             'id_guru',
             'id_guru'
+        );
+    }
+
+    public function mataPelajaran()
+    {
+        return $this->belongsTo(
+            MataPelajaran::class,
+            'id_mata_pelajaran',
+            'id_mata_pelajaran'
         );
     }
 

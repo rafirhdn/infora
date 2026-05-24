@@ -1,140 +1,296 @@
 <script setup>
-import { ref } from 'vue'
-import {
-  LayoutDashboard,
-  BookOpen,
-  Building2,
-  Calendar,
-  Users,
-  GraduationCap,
-  ClipboardList,
-  User,
-  Bell,
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  X
-} from 'lucide-vue-next'
+  import { ref, computed, onMounted } from 'vue'
+  import {
+    LayoutDashboard,
+    BookOpen,
+    Building2,
+    Calendar,
+    Users,
+    GraduationCap,
+    ClipboardList,
+    User,
+    Bell,
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    X,
+    LogOut
+  } from 'lucide-vue-next'
 
-definePageMeta({
-  layout: 'admin'
-})
+  definePageMeta({ layout: false })
 
-/* =========================
-   SIDEBAR MENU
+  const api = useApi()
+
+  /* =========================
+SIDEBAR MENU
 ========================= */
-const adminMenus = [
-  { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
-  { label: 'Jurusan', path: 'jurusan', icon: Building2 },
-  { label: 'Kelas', path: 'kelas', icon: BookOpen },
-  { label: 'Semester', path: 'semester', icon: Calendar },
-  { label: 'Guru', path: 'guru', icon: Users },
-  { label: 'Siswa', path: 'siswa', icon: GraduationCap },
-  { label: 'Jadwal', path: 'jadwal', icon: ClipboardList },
-  { label: 'Profil Saya', path: 'profile', icon: User },
-]
+  const adminMenus = [
+    {
+      label: 'Dashboard',
+      path: '/manajemenAkademi/tataUsaha/dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      label: 'Jurusan',
+      path: '/manajemenAkademi/tataUsaha/jurusan',
+      icon: Building2
+    },
+    {
+      label: 'Kelas',
+      path: '/manajemenAkademi/tataUsaha/kelas',
+      icon: BookOpen
+    },
+    {
+      label: 'Semester',
+      path: '/manajemenAkademi/tataUsaha/semester',
+      icon: Calendar
+    },
+    { label: 'Guru', path: '/manajemenAkademi/tataUsaha/guru', icon: Users },
+    {
+      label: 'Siswa',
+      path: '/manajemenAkademi/tataUsaha/siswa',
+      icon: GraduationCap
+    },
+    {
+      label: 'Jadwal',
+      path: '/manajemenAkademi/tataUsaha/jadwal',
+      icon: ClipboardList
+    },
+    {
+      label: 'Profil Saya',
+      path: '/manajemenAkademi/tataUsaha/profile',
+      icon: User
+    }
+  ]
 
-/* =========================
-   DATA JADWAL
+  /* =========================
+STATE
 ========================= */
-const initialJadwal = [
-  {
-    id: 1,
-    kelas: 'X RPL A',
-    mapel: 'Pemrograman Web',
-    guru: 'Budi Santoso, S.Kom',
-    hari: 'Senin',
-    jam: '07:00 - 09:15',
-    ruang: 'Lab Komputer 1'
-  },
-  {
-    id: 2,
-    kelas: 'XI DKV B',
-    mapel: 'Desain Grafis',
-    guru: 'Siti Aminah, S.Ds',
-    hari: 'Selasa',
-    jam: '09:30 - 11:45',
-    ruang: 'Studio DKV'
-  },
-]
+  const jadwalList = ref([])
+  const kelasList = ref([])
+  const guruList = ref([])
+  const semesterList = ref([])
+  const mataPelajaranList = ref([])
 
-const jadwalList = ref(initialJadwal)
+  const loading = ref(false)
+  const search = ref('')
+  const errorMessage = ref('')
 
-/* =========================
-   MODAL
+  /* =========================
+MODAL
 ========================= */
-const isModalOpen = ref(false)
-const modalMode = ref('add')
+  const isModalOpen = ref(false)
+  const modalMode = ref('add')
 
-const formData = ref({
-  kelas: '',
-  mapel: '',
-  guru: '',
-  hari: 'Senin',
-  jam: '',
-  ruang: ''
-})
+  const defaultForm = () => ({
+    id_jadwal: null,
+    hari: 'senin',
+    jam_mulai: '',
+    jam_selesai: '',
+    ruang: '',
+    id_kelas: null,
+    id_guru: null,
+    id_semester: null,
+    id_mata_pelajaran: null
+  })
 
-const handleOpenModal = (mode, data = null) => {
-  modalMode.value = mode
+  const formData = ref(defaultForm())
 
-  if (data) {
-    formData.value = { ...data }
-  } else {
-    formData.value = {
-      kelas: '',
-      mapel: '',
-      guru: '',
-      hari: 'Senin',
-      jam: '',
-      ruang: ''
+  const resetForm = () => {
+    formData.value = defaultForm()
+    errorMessage.value = ''
+  }
+
+  /* =========================
+FETCH DATA
+========================= */
+  const fetchJadwal = async () => {
+    try {
+      loading.value = true
+      const response = await api('/jadwal')
+
+      const raw =
+        response?.data?.data?.data ||
+        response?.data?.data ||
+        response?.data ||
+        []
+
+      // NORMALISASI BIAR TEMPLATE GAK BINGUNG
+      jadwalList.value = raw.map((item) => ({
+        ...item,
+        mata_pelajaran: item.mata_pelajaran || item.mataPelajaran || null,
+        guru: item.guru || null,
+        kelas: item.kelas || null
+      }))
+    } catch (err) {
+      console.error(err)
+    } finally {
+      loading.value = false
     }
   }
 
-  isModalOpen.value = true
-}
+  const fetchDropdown = async () => {
+    try {
+      const [kelas, guru, semester, mapel] = await Promise.all([
+        api('/kelas'),
+        api('/guru'),
+        api('/semester'),
+        api('/mata-pelajaran')
+      ])
 
-const closeModal = () => {
-  isModalOpen.value = false
-}
+      kelasList.value = kelas?.data?.data || kelas?.data || kelas || []
+      guruList.value = guru?.data?.data || guru?.data || guru || []
+      semesterList.value =
+        semester?.data?.data || semester?.data || semester || []
+      mataPelajaranList.value = mapel?.data?.data || mapel?.data || mapel || []
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
-const handleSubmit = () => {
-  if (modalMode.value === 'add') {
-    jadwalList.value.push({
-      id: Date.now(),
-      ...formData.value
+  onMounted(async () => {
+    await fetchJadwal()
+    await fetchDropdown()
+  })
+
+  /* =========================
+SEARCH
+========================= */
+  const filteredJadwal = computed(() => {
+    if (!search.value) return jadwalList.value
+
+    const keyword = search.value.toLowerCase()
+
+    return jadwalList.value.filter((item) => {
+      const kelasText =
+        `${item.kelas?.tingkat || ''} ${item.kelas?.jurusan?.nama || ''} ${item.kelas?.nama || ''}`.toLowerCase()
+
+      return (
+        kelasText.includes(keyword) ||
+        item.mata_pelajaran?.nama ||
+        item.mataPelajaran?.nama?.toLowerCase()?.includes(keyword) ||
+        item.guru?.nama?.toLowerCase()?.includes(keyword) ||
+        item.hari?.toLowerCase()?.includes(keyword) ||
+        item.ruang?.toLowerCase()?.includes(keyword)
+      )
     })
-  } else {
-    const index = jadwalList.value.findIndex(
-      item => item.id === formData.value.id
-    )
+  })
 
-    if (index !== -1) {
-      jadwalList.value[index] = { ...formData.value }
+  /* =========================
+MODAL
+========================= */
+  const handleOpenModal = (mode, data = null) => {
+    modalMode.value = mode
+    errorMessage.value = ''
+
+    if (data) {
+      formData.value = {
+        id_jadwal: data.id_jadwal,
+        hari: data.hari || 'senin',
+        jam_mulai: data.jam_mulai || '',
+        jam_selesai: data.jam_selesai || '',
+        ruang: data.ruang || '',
+        id_kelas: data.id_kelas || '',
+        id_guru: data.id_guru || '',
+        id_semester: data.id_semester || '',
+        id_mata_pelajaran: data.id_mata_pelajaran || ''
+      }
+    } else {
+      resetForm()
+    }
+
+    isModalOpen.value = true
+  }
+
+  const closeModal = () => {
+    isModalOpen.value = false
+    resetForm()
+  }
+
+  /* =========================
+SUBMIT
+========================= */
+  const handleSubmit = async () => {
+    try {
+      errorMessage.value = ''
+
+      if (modalMode.value === 'add') {
+        await api('/jadwal', {
+          method: 'POST',
+          body: formData.value
+        })
+      } else {
+        await api(`/jadwal/${formData.value.id_jadwal}`, {
+          method: 'PUT',
+          body: formData.value
+        })
+      }
+
+      await fetchJadwal()
+      closeModal()
+    } catch (err) {
+      errorMessage.value =
+        err?.data?.message ||
+        err?.response?._data?.message ||
+        'Terjadi kesalahan'
     }
   }
 
-  closeModal()
-}
+  /* =========================
+DELETE
+========================= */
+  const deleteJadwal = async (id) => {
+    if (!confirm('Yakin ingin menghapus jadwal ini?')) return
 
-const deleteJadwal = (id) => {
-  jadwalList.value = jadwalList.value.filter(
-    item => item.id !== id
-  )
-}
+    try {
+      await api(`/jadwal/${id}`, { method: 'DELETE' })
+      await fetchJadwal()
+    } catch (err) {
+      console.error(err)
+    }
+  }
 </script>
 
 <template>
   <div class="app-container">
-    <!-- Sidebar -->
-    <Sidebar role="Admin / TU" :menus="adminMenus" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <GraduationCap :size="28" />
+        </div>
 
-    <!-- Main Content -->
+        <h2 class="brand-name">EduManage</h2>
+      </div>
+
+      <div class="sidebar-role-badge">
+        <span class="badge badge-primary role-text">Admin / TU</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li v-for="(menu, index) in adminMenus" :key="index">
+            <NuxtLink :to="menu.path" class="nav-link" active-class="active">
+              <component :is="menu.icon" :size="20" />
+              <span>{{ menu.label }}</span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout">
+          <LogOut :size="20" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
     <main class="main-content">
-      <!-- HEADER -->
       <header class="top-header">
-        <div class="header-left">
+        <div>
           <h1 class="page-title">Jadwal Pelajaran</h1>
 
           <p class="page-subtitle">
@@ -147,47 +303,43 @@ const deleteJadwal = (id) => {
             <Search :size="18" class="search-icon" />
 
             <input
+              v-model="search"
               type="text"
-              placeholder="Search anything..."
-              class="search-input"
-            />
+              placeholder="Cari jadwal..."
+              class="search-input" />
           </div>
 
           <button class="notification-btn">
             <Bell :size="20" />
-
             <span class="notification-dot"></span>
           </button>
+        </div>
+        <div class="profile-menu">
+          <div class="profile-info">
+            <span class="profile-name">Admin Utama</span>
 
-          <div class="profile-menu">
-            <div class="profile-info">
-              <span class="profile-name">
-                Admin Utama
-              </span>
-
-              <span class="profile-role">
-                Admin / TU
-              </span>
-            </div>
-
-            <img
-              src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
-              alt="Profile"
-              class="profile-avatar"
-            />
+            <span class="profile-role">Admin / TU</span>
           </div>
+
+          <img
+            class="profile-avatar"
+            src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
+            alt="Profile" />
         </div>
       </header>
 
-      <!-- CONTENT -->
+      <!-- CARD -->
       <div class="card">
         <div class="card-header">
-          <h3>Daftar Jadwal</h3>
+          <div>
+            <h3>Daftar Jadwal</h3>
 
-          <button
-            class="btn btn-primary"
-            @click="handleOpenModal('add')"
-          >
+            <p class="card-subtitle">
+              Seluruh data jadwal pembelajaran sekolah
+            </p>
+          </div>
+
+          <button class="btn btn-primary" @click="handleOpenModal('add')">
             <Plus :size="18" />
             Tambah Jadwal
           </button>
@@ -208,17 +360,27 @@ const deleteJadwal = (id) => {
             </thead>
 
             <tbody>
-              <tr
-                v-for="item in jadwalList"
-                :key="item.id"
-              >
+              <tr v-if="loading">
+                <td colspan="7" class="empty-state">Loading data...</td>
+              </tr>
+              <tr v-for="item in filteredJadwal" :key="item.id_jadwal">
                 <td>
-                  <strong>{{ item.kelas }}</strong>
+                  <strong>
+                    {{
+                      item.kelas?.tingkat +
+                      ' ' +
+                      item.kelas?.jurusan?.nama +
+                      ' ' +
+                      item.kelas?.nama
+                    }}
+                  </strong>
                 </td>
 
-                <td>{{ item.mapel }}</td>
+                <td>
+                  {{ item.mata_pelajaran?.nama || '-' }}
+                </td>
 
-                <td>{{ item.guru }}</td>
+                <td>{{ item.guru?.nama || '-' }}</td>
 
                 <td>
                   <span class="badge badge-primary">
@@ -226,7 +388,9 @@ const deleteJadwal = (id) => {
                   </span>
                 </td>
 
-                <td>{{ item.jam }}</td>
+                <td>
+                  {{ item.jam_mulai || '-' }} - {{ item.jam_selesai || '-' }}
+                </td>
 
                 <td>{{ item.ruang }}</td>
 
@@ -234,25 +398,23 @@ const deleteJadwal = (id) => {
                   <div class="action-group">
                     <button
                       class="btn-icon"
-                      @click="handleOpenModal('edit', item)"
-                    >
+                      type="button"
+                      @click="handleOpenModal('edit', item)">
                       <Edit2 :size="16" />
                     </button>
 
                     <button
                       class="btn-icon text-danger"
-                      @click="deleteJadwal(item.id)"
-                    >
+                      type="button"
+                      @click="deleteJadwal(item.id_jadwal)">
                       <Trash2 :size="16" />
                     </button>
                   </div>
                 </td>
               </tr>
 
-              <tr v-if="jadwalList.length === 0">
-                <td colspan="7" class="empty-state">
-                  Belum ada data jadwal
-                </td>
+              <tr v-if="filteredJadwal.length === 0 && !loading">
+                <td colspan="7" class="empty-state">Belum ada data jadwal</td>
               </tr>
             </tbody>
           </table>
@@ -261,138 +423,180 @@ const deleteJadwal = (id) => {
     </main>
 
     <!-- MODAL -->
-    <div
-      v-if="isModalOpen"
-      class="modal-overlay"
-      @click="closeModal"
-    >
-      <div
-        class="modal-content"
-        @click.stop
-      >
+    <div v-if="isModalOpen" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h3 class="modal-title">
-            {{
-              modalMode === 'add'
-                ? 'Tambah Jadwal Baru'
-                : 'Edit Jadwal'
-            }}
+            {{ modalMode === 'add' ? 'Tambah Jadwal Baru' : 'Edit Jadwal' }}
           </h3>
 
-          <button
-            class="modal-close-btn"
-            @click="closeModal"
-          >
+          <button class="modal-close-btn" type="button" @click="closeModal">
             <X :size="20" />
           </button>
         </div>
 
         <div class="modal-body">
           <form @submit.prevent="handleSubmit">
-            <div
-              class="form-group-row"
-            >
+            <p v-if="errorMessage" class="error-message">
+              {{ errorMessage }}
+            </p>
+
+            <div class="form-group-row">
+              <!-- HARI -->
               <div class="form-group flex-1">
-                <label class="form-label">
-                  Hari
-                </label>
+                <label for="hari" class="form-label">Hari</label>
 
                 <select
+                  id="hari"
+                  name="hari"
                   class="form-input"
-                  v-model="formData.hari"
-                >
-                  <option value="Senin">Senin</option>
-                  <option value="Selasa">Selasa</option>
-                  <option value="Rabu">Rabu</option>
-                  <option value="Kamis">Kamis</option>
-                  <option value="Jumat">Jumat</option>
+                  v-model="formData.hari">
+                  <option value="senin">Senin</option>
+                  <option value="selasa">Selasa</option>
+                  <option value="rabu">Rabu</option>
+                  <option value="kamis">Kamis</option>
+                  <option value="jumat">Jumat</option>
                 </select>
               </div>
 
+              <!-- JAM MULAI -->
               <div class="form-group flex-1">
-                <label class="form-label">
-                  Jam (Waktu)
-                </label>
+                <label for="jam_mulai" class="form-label">Jam Mulai</label>
 
                 <input
-                  type="text"
+                  id="jam_mulai"
+                  name="jam_mulai"
+                  type="time"
                   class="form-input"
-                  placeholder="07:00 - 09:15"
-                  v-model="formData.jam"
-                  required
-                />
+                  v-model="formData.jam_mulai"
+                  autocomplete="off"
+                  required />
+              </div>
+
+              <!-- JAM SELESAI -->
+              <div class="form-group flex-1">
+                <label for="jam_selesai" class="form-label">Jam Selesai</label>
+
+                <input
+                  id="jam_selesai"
+                  name="jam_selesai"
+                  type="time"
+                  class="form-input"
+                  v-model="formData.jam_selesai"
+                  autocomplete="off"
+                  required />
               </div>
             </div>
 
+            <!-- KELAS -->
             <div class="form-group">
-              <label class="form-label">
-                Kelas
-              </label>
+              <label for="id_kelas" class="form-label">Kelas</label>
 
-              <input
-                type="text"
+              <select
+                id="id_kelas"
+                name="id_kelas"
                 class="form-input"
-                placeholder="Misal: X RPL A"
-                v-model="formData.kelas"
-                required
-              />
+                v-model="formData.id_kelas"
+                required>
+                <option value="">Pilih Kelas</option>
+
+                <option
+                  v-for="kelas in kelasList"
+                  :key="kelas.id_kelas"
+                  :value="kelas.id_kelas">
+                  {{
+                    kelas.tingkat + ' ' + kelas.jurusan?.nama + ' ' + kelas.nama
+                  }}
+                </option>
+              </select>
             </div>
 
+            <!-- GURU -->
+            <!-- GURU -->
             <div class="form-group">
-              <label class="form-label">
+              <label for="id_guru" class="form-label">Guru Pengajar</label>
+
+              <select
+                id="id_guru"
+                name="id_guru"
+                class="form-input"
+                v-model="formData.id_guru"
+                required>
+                <option value="">Pilih Guru</option>
+
+                <option
+                  v-for="guru in guruList"
+                  :key="guru.id_guru"
+                  :value="guru.id_guru">
+                  {{ guru.nama }}
+                </option>
+              </select>
+            </div>
+
+            <!-- MATA PELAJARAN -->
+            <div class="form-group">
+              <label for="id_mata_pelajaran" class="form-label">
                 Mata Pelajaran
               </label>
 
-              <input
-                type="text"
+              <select
+                id="id_mata_pelajaran"
                 class="form-input"
-                placeholder="Misal: Pemrograman Web"
-                v-model="formData.mapel"
-                required
-              />
+                v-model="formData.id_mata_pelajaran"
+                required>
+                <option value="">Pilih Mata Pelajaran</option>
+
+                <option
+                  v-for="mapel in mataPelajaranList"
+                  :key="mapel.id_mata_pelajaran"
+                  :value="mapel.id_mata_pelajaran">
+                  {{ mapel.nama }}
+                </option>
+              </select>
             </div>
 
+            <!-- SEMESTER -->
             <div class="form-group">
-              <label class="form-label">
-                Guru Pengajar
-              </label>
+              <label for="id_semester" class="form-label">Semester</label>
 
-              <input
-                type="text"
+              <select
+                id="id_semester"
+                name="id_semester"
                 class="form-input"
-                placeholder="Nama Guru"
-                v-model="formData.guru"
-                required
-              />
+                v-model="formData.id_semester"
+                required>
+                <option value="">Pilih Semester</option>
+
+                <option
+                  v-for="semester in semesterList"
+                  :key="semester.id_semester"
+                  :value="semester.id_semester">
+                  {{ semester.nama }}
+                </option>
+              </select>
             </div>
 
+            <!-- RUANG -->
             <div class="form-group">
-              <label class="form-label">
-                Ruang Kelas / Lab
-              </label>
+              <label for="ruang" class="form-label">Ruang Kelas / Lab</label>
 
               <input
+                id="ruang"
+                name="ruang"
                 type="text"
                 class="form-input"
                 placeholder="Misal: Lab Komputer 1"
                 v-model="formData.ruang"
-                required
-              />
+                autocomplete="off"
+                required />
             </div>
 
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-outline"
-                @click="closeModal"
-              >
+              <button type="button" class="btn btn-outline" @click="closeModal">
                 Batal
               </button>
 
-              <button
-                type="submit"
-                class="btn btn-primary"
-              >
+              <button type="submit" class="btn btn-primary" :disabled="loading">
                 Simpan
               </button>
             </div>
@@ -403,501 +607,519 @@ const deleteJadwal = (id) => {
   </div>
 </template>
 
-<style>
-:root {
-  --primary: #FF6A3D;
-  --primary-hover: #E85B31;
-  --primary-light: #FFF0EB;
+<style scoped>
+  :root {
+    --primary: #ff6a3d;
+    --primary-hover: #e85b31;
+    --primary-light: #fff0eb;
 
-  --secondary: #2C3E50;
-  --text-main: #334155;
-  --text-muted: #64748B;
+    --text-main: #334155;
+    --text-muted: #64748b;
 
-  --bg-app: #F8FAFC;
-  --bg-surface: #FFFFFF;
+    --bg-app: #f8fafc;
 
-  --success: #10B981;
-  --success-light: #D1FAE5;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
 
-  --warning: #F59E0B;
-  --warning-light: #FEF3C7;
+    --border: #e2e8f0;
 
-  --danger: #EF4444;
-  --danger-light: #FEE2E2;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
-  --border: #E2E8F0;
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.15);
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-
-  --shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
-
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-  --shadow-orange:
-    0 10px 15px -3px rgba(255, 106, 61, 0.2);
-
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  --transition:
-    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg-app);
-  color: var(--text-main);
-}
-
-/* Layout */
-.app-container {
-  display: flex;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  margin-left: 260px;
-}
-
-/* Header */
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius-full);
-
-  padding: 0.5rem 1rem;
-  width: 300px;
-}
-
-.search-icon {
-  color: var(--text-muted);
-  margin-right: 0.5rem;
-}
-
-.search-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-}
-
-.notification-btn {
-  position: relative;
-
-  width: 40px;
-  height: 40px;
-
-  border-radius: 50%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.notification-dot {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-
-  width: 8px;
-  height: 8px;
-
-  background: var(--danger);
-  border-radius: 50%;
-}
-
-.profile-menu {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.profile-name {
-  font-weight: 600;
-}
-
-.profile-role {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.profile-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
-
-/* Typography */
-.page-title {
-  font-size: 1.75rem;
-  color: var(--secondary);
-}
-
-.page-subtitle {
-  margin-top: 0.3rem;
-  color: var(--text-muted);
-}
-
-/* Card */
-.card {
-  background: var(--bg-surface);
-
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-
-  padding: 1.5rem;
-
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.5rem;
-
-  padding: 0.75rem 1.2rem;
-
-  border: none;
-  cursor: pointer;
-
-  border-radius: var(--radius-md);
-
-  font-weight: 500;
-
-  transition: var(--transition);
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
-
-.btn-outline {
-  border: 1px solid var(--border);
-  background: white;
-}
-
-.btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.5rem;
-
-  border-radius: var(--radius-md);
-
-  transition: var(--transition);
-}
-
-.btn-icon:hover {
-  background: var(--bg-app);
-}
-
-.text-danger {
-  color: var(--danger);
-}
-
-.text-danger:hover {
-  background: var(--danger-light);
-}
-
-/* Table */
-.table-container {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: var(--bg-app);
-
-  padding: 1rem;
-  text-align: left;
-
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  color: var(--text-muted);
-
-  border-bottom: 1px solid var(--border);
-}
-
-td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-tr:hover td {
-  background: #FCFCFC;
-}
-
-.action-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.empty-state {
-  text-align: center;
-  color: var(--text-muted);
-}
-
-/* Badge */
-.badge {
-  display: inline-block;
-
-  padding: 0.3rem 0.8rem;
-
-  border-radius: var(--radius-full);
-
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-primary {
-  background: var(--primary-light);
-  color: var(--primary);
-}
-
-/* Form */
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.form-label {
-  display: block;
-
-  margin-bottom: 0.5rem;
-
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-
-  padding: 0.75rem 1rem;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-
-  background: #F8FAFC;
-
-  transition: var(--transition);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--primary);
-
-  background: white;
-
-  box-shadow:
-    0 0 0 3px rgba(255, 106, 61, 0.1);
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  z-index: 1000;
-
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-  width: 100%;
-  max-width: 550px;
-
-  background: var(--bg-surface);
-
-  border-radius: var(--radius-lg);
-
-  padding: 2rem;
-
-  box-shadow: var(--shadow-lg);
-
-  animation: slideUp 0.3s ease;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.modal-close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.4rem;
-
-  border: none;
-  cursor: pointer;
-
-  border-radius: var(--radius-md);
-
-  background: transparent;
-
-  transition: var(--transition);
-}
-
-.modal-close-btn:hover {
-  background: var(--bg-app);
-  color: var(--danger);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-
-  margin-top: 2rem;
-}
-
-/* Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+    --transition: all 0.25s ease;
   }
 
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-app);
   }
-}
 
-/* Responsive */
-@media (max-width: 768px) {
+  .sidebar {
+    width: 260px;
+    background: white;
+    border-right: 1px solid var(--border);
+
+    position: fixed;
+    inset: 0 auto 0 0;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 24px;
+  }
+
+  .logo-box {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    border-radius: 12px;
+  }
+
+  .brand-name {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .sidebar-role-badge {
+    padding: 0 24px 20px;
+  }
+
+  .role-text {
+    font-size: 12px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 0 16px;
+  }
+
+  .nav-list {
+    list-style: none;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+
+    color: var(--text-muted);
+    text-decoration: none;
+
+    transition: var(--transition);
+  }
+
+  .nav-link:hover {
+    background: #f8fafc;
+    color: var(--primary);
+  }
+
+  .nav-link.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .sidebar-footer {
+    padding: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-logout {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    cursor: pointer;
+
+    color: var(--danger);
+    background: transparent;
+  }
+
   .main-content {
-    margin-left: 0;
-    padding: 1rem;
+    flex: 1;
+    margin-left: 260px;
+    padding: 32px;
   }
 
   .top-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
   }
 
   .header-right {
-    width: 100%;
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
   .search-bar {
+    width: 320px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: white;
+  }
+
+  .search-input {
     width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+
+  .search-icon {
+    margin-right: 8px;
+    color: var(--text-muted);
+  }
+
+  .notification-btn {
+    position: relative;
+
+    width: 46px;
+    height: 46px;
+
+    border: 1px solid var(--border);
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+  }
+
+  .notification-dot {
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+    background: red;
+  }
+
+  .card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    padding: 24px;
+
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 24px;
+  }
+
+  .card-subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-outline {
+    border: 1px solid var(--border);
+    background: white;
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #f8fafc;
+
+    padding: 16px;
+    text-align: left;
+
+    color: var(--text-muted);
+  }
+
+  td {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .badge {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-primary {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+  }
+
+  .btn-icon:hover {
+    background: #f1f5f9;
+  }
+
+  .text-danger {
+    color: var(--danger);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
   }
 
   .form-group-row {
-    flex-direction: column;
+    display: flex;
+    gap: 1rem;
   }
-}
+
+  .flex-1 {
+    flex: 1;
+  }
+
+  .form-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    outline: none;
+  }
+
+  .form-input:focus {
+    border-color: var(--primary);
+    background: white;
+
+    box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.1);
+  }
+
+  .error-message {
+    margin-bottom: 16px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.55);
+
+    backdrop-filter: blur(4px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    z-index: 9999;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 600px;
+
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 32px;
+
+    box-shadow: var(--shadow-lg);
+
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 28px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .modal-close-btn {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    margin-top: 32px;
+
+    padding-top: 24px;
+
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .top-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .header-right {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      width: 100%;
+    }
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .form-group-row {
+      flex-direction: column;
+    }
+  }
 </style>

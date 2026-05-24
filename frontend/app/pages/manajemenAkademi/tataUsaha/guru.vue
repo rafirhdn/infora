@@ -1,151 +1,284 @@
 <script setup>
-import { ref } from 'vue'
-import {
-  LayoutDashboard,
-  BookOpen,
-  Building2,
-  Calendar,
-  Users,
-  GraduationCap,
-  ClipboardList,
-  User,
-  Bell,
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  X
-} from 'lucide-vue-next'
+  import { ref, onMounted, computed, watch } from 'vue'
 
-definePageMeta({
-  layout: 'admin'
-})
+  import {
+    LayoutDashboard,
+    BookOpen,
+    Building2,
+    Calendar,
+    Users,
+    GraduationCap,
+    ClipboardList,
+    User,
+    Bell,
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    X,
+    LogOut
+  } from 'lucide-vue-next'
 
-/* =========================
-   SIDEBAR MENU
-========================= */
-const adminMenus = [
-  { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
-  { label: 'Jurusan', path: 'jurusan', icon: Building2 },
-  { label: 'Kelas', path: 'kelas', icon: BookOpen },
-  { label: 'Semester', path: 'semester', icon: Calendar },
-  { label: 'Guru', path: 'guru', icon: Users },
-  { label: 'Siswa', path: 'siswa', icon: GraduationCap },
-  { label: 'Jadwal', path: 'jadwal', icon: ClipboardList },
-  { label: 'Profil Saya', path: 'profile', icon: User },
-]
+  definePageMeta({
+    layout: false
+  })
 
-/* =========================
-   DATA GURU
-========================= */
-const initialGuru = [
-  {
-    id: 1,
-    nama: 'Budi Santoso, S.Kom',
-    nik: '198001012005011001',
-    email: 'budi.rpl@sekolah.id',
-    hp: '081234567890',
-    jurusan: 'RPL'
-  },
-  {
-    id: 2,
-    nama: 'Siti Aminah, S.Ds',
-    nik: '198502022010012002',
-    email: 'siti.dkv@sekolah.id',
-    hp: '081298765432',
-    jurusan: 'DKV'
-  },
-  {
-    id: 3,
-    nama: 'Ahmad Yani, M.Pd',
-    nik: '197503032000011003',
-    email: 'ahmad.umum@sekolah.id',
-    hp: '081122334455',
-    jurusan: '-'
-  },
-]
+  const api = useApi()
 
-const guruList = ref(initialGuru)
+  const adminMenus = [
+    {
+      label: 'Dashboard',
+      path: '/manajemenAkademi/tataUsaha/dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      label: 'Jurusan',
+      path: '/manajemenAkademi/tataUsaha/jurusan',
+      icon: Building2
+    },
+    {
+      label: 'Kelas',
+      path: '/manajemenAkademi/tataUsaha/kelas',
+      icon: BookOpen
+    },
+    {
+      label: 'Semester',
+      path: '/manajemenAkademi/tataUsaha/semester',
+      icon: Calendar
+    },
+    {
+      label: 'Guru',
+      path: '/manajemenAkademi/tataUsaha/guru',
+      icon: Users
+    },
+    {
+      label: 'Siswa',
+      path: '/manajemenAkademi/tataUsaha/siswa',
+      icon: GraduationCap
+    },
+    {
+      label: 'Jadwal',
+      path: '/manajemenAkademi/tataUsaha/jadwal',
+      icon: ClipboardList
+    },
+    {
+      label: 'Profil Saya',
+      path: '/manajemenAkademi/tataUsaha/profile',
+      icon: User
+    }
+  ]
 
-const isModalOpen = ref(false)
-const modalMode = ref('add')
+  const guruList = ref([])
+  const jurusanList = ref([])
 
-const formData = ref({
-  nama: '',
-  nik: '',
-  email: '',
-  hp: '',
-  jurusan: ''
-})
+  const loading = ref(false)
+  const search = ref('')
+  const isModalOpen = ref(false)
+  const modalMode = ref('add')
+  const selectedId = ref(null)
 
-/* =========================
-   MODAL
-========================= */
-const handleOpenModal = (mode, data = null) => {
-  modalMode.value = mode
+  const formData = ref({
+    nama: '',
+    nik: '',
+    email: '',
+    password: '',
+    nomor: '',
+    id_jurusan: ''
+  })
 
-  if (data) {
-    formData.value = { ...data }
-  } else {
+  const fetchGuru = async () => {
+    try {
+      loading.value = true
+
+      const response = await api('/guru', {
+        method: 'GET'
+      })
+
+      guruList.value = response.map((item) => ({
+        ...item,
+        nama: item.nama,
+        email: item.akun?.email || '-'
+      }))
+    } catch (error) {
+      console.error(error)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const fetchJurusan = async () => {
+    try {
+      const response = await api('/jurusan', {
+        method: 'GET'
+      })
+
+      jurusanList.value = response
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const filteredGuru = computed(() => {
+    return guruList.value.filter((item) => {
+      const keyword = search.value.toLowerCase()
+
+      return (
+        item.nama?.toLowerCase().includes(keyword) ||
+        item.akun?.email?.toLowerCase().includes(keyword) ||
+        item.nik?.toLowerCase().includes(keyword)
+      )
+    })
+  })
+
+  const resetForm = () => {
     formData.value = {
       nama: '',
       nik: '',
       email: '',
-      hp: '',
-      jurusan: ''
+      password: '',
+      nomor: '',
+      id_jurusan: ''
     }
   }
 
-  isModalOpen.value = true
-}
+  const handleOpenModal = (mode, data = null) => {
+    modalMode.value = mode
 
-const closeModal = () => {
-  isModalOpen.value = false
-}
+    if (data) {
+      selectedId.value = data.id_guru
 
-const handleSubmit = () => {
-  if (modalMode.value === 'add') {
-    guruList.value.push({
-      id: Date.now(),
-      ...formData.value,
-      jurusan: formData.value.jurusan || '-'
-    })
-  } else {
-    const index = guruList.value.findIndex(
-      item => item.id === formData.value.id
-    )
-
-    if (index !== -1) {
-      guruList.value[index] = {
-        ...formData.value,
-        jurusan: formData.value.jurusan || '-'
+      formData.value = {
+        nama: data.nama || '',
+        nik: data.nik || '',
+        email: data.akun?.email || '',
+        password: '',
+        nomor: data.nomor || '',
+        id_jurusan: data.id_jurusan || ''
       }
+    } else {
+      selectedId.value = null
+      resetForm()
+    }
+
+    isModalOpen.value = true
+  }
+
+  const closeModal = () => {
+    isModalOpen.value = false
+    selectedId.value = null
+    resetForm()
+  }
+
+  const handleSubmit = async () => {
+    if (loading.value) return
+
+    loading.value = true
+
+    try {
+      const payload = {
+        nama: formData.value.nama,
+        nik: formData.value.nik,
+        email: formData.value.email,
+        nomor: formData.value.nomor,
+        id_jurusan: formData.value.id_jurusan
+      }
+
+      if (modalMode.value === 'add') {
+        payload.password = formData.value.password
+
+        await api('/guru', {
+          method: 'POST',
+          body: payload
+        })
+      } else {
+        await api(`/guru/${selectedId.value}`, {
+          method: 'PUT',
+          body: payload
+        })
+      }
+
+      await fetchGuru()
+
+      closeModal()
+      resetForm()
+    } catch (error) {
+      console.error(error)
+
+      alert(error?.data?.message || error?.message || 'Terjadi kesalahan')
+    } finally {
+      loading.value = false
     }
   }
 
-  closeModal()
-}
+  const handleDelete = async (id) => {
+    const confirmed = confirm('Yakin ingin menghapus guru ini?')
 
-const handleDelete = (id) => {
-  guruList.value = guruList.value.filter(item => item.id !== id)
-}
+    if (!confirmed) return
+
+    try {
+      await api(`/guru/${id}`, {
+        method: 'DELETE'
+      })
+
+      await fetchGuru()
+    } catch (error) {
+      console.error(error)
+
+      alert(error?.data?.message || error?.message || 'Gagal menghapus data')
+    }
+  }
+
+  onMounted(async () => {
+    await Promise.all([fetchGuru(), fetchJurusan()])
+  })
 </script>
 
 <template>
   <div class="app-container">
-    <!-- Sidebar -->
-    <Sidebar role="Admin / TU" :menus="adminMenus" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <GraduationCap :size="28" />
+        </div>
 
-    <!-- Main Content -->
+        <h2 class="brand-name">EduManage</h2>
+      </div>
+
+      <div class="sidebar-role-badge">
+        <span class="badge badge-primary role-text">Admin / TU</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li v-for="(menu, index) in adminMenus" :key="index">
+            <NuxtLink :to="menu.path" class="nav-link" active-class="active">
+              <component :is="menu.icon" :size="20" />
+
+              <span>
+                {{ menu.label }}
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout">
+          <LogOut :size="20" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
     <main class="main-content">
       <!-- HEADER -->
       <header class="top-header">
-        <div class="header-left">
+        <div>
           <h1 class="page-title">Data Guru</h1>
 
-          <p class="page-subtitle">
-            Kelola data tenaga pendidik sekolah
-          </p>
+          <p class="page-subtitle">Kelola data tenaga pendidik sekolah</p>
         </div>
 
         <div class="header-right">
@@ -153,48 +286,45 @@ const handleDelete = (id) => {
             <Search :size="18" class="search-icon" />
 
             <input
+              v-model="search"
               type="text"
-              placeholder="Search anything..."
-              class="search-input"
-            />
+              placeholder="Cari guru..."
+              class="search-input" />
           </div>
 
           <button class="notification-btn">
             <Bell :size="20" />
+
             <span class="notification-dot"></span>
           </button>
 
           <div class="profile-menu">
             <div class="profile-info">
               <span class="profile-name">Admin Utama</span>
+
               <span class="profile-role">Admin / TU</span>
             </div>
 
             <img
-              src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
-              alt="Profile"
               class="profile-avatar"
-            />
+              src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
+              alt="Profile" />
           </div>
         </div>
       </header>
 
-      <!-- CONTENT -->
+      <!-- CARD -->
       <div class="card">
         <div class="card-header">
           <div>
             <h3>Daftar Guru</h3>
 
-            <p class="card-subtitle">
-              Seluruh data tenaga pendidik sekolah
-            </p>
+            <p class="card-subtitle">Seluruh data tenaga pendidik sekolah</p>
           </div>
 
-          <button
-            class="btn btn-primary"
-            @click="handleOpenModal('add')"
-          >
+          <button class="btn btn-primary" @click="handleOpenModal('add')">
             <Plus :size="18" />
+
             Tambah Guru
           </button>
         </div>
@@ -207,36 +337,43 @@ const handleDelete = (id) => {
                 <th>Nama Lengkap</th>
                 <th>NIK/NIP</th>
                 <th>Email</th>
-                <th>No. HP</th>
-                <th>Jurusan</th>
+                <th>No HP</th>
+                <th>Jurusan / Mapel</th>
                 <th>Aksi</th>
               </tr>
             </thead>
 
             <tbody>
-              <tr
-                v-for="(item, index) in guruList"
-                :key="item.id"
-              >
+              <tr v-for="(item, index) in filteredGuru" :key="item.id_guru">
                 <td>{{ index + 1 }}</td>
 
                 <td>
-                  <strong>{{ item.nama }}</strong>
+                  <strong>
+                    {{ item.nama }}
+                  </strong>
                 </td>
 
                 <td>{{ item.nik }}</td>
 
-                <td>{{ item.email }}</td>
-
-                <td>{{ item.hp }}</td>
+                <td>
+                  {{ item.email }}
+                </td>
 
                 <td>
-                  <span
-                    v-if="item.jurusan !== '-'"
-                    class="badge badge-primary"
-                  >
-                    {{ item.jurusan }}
-                  </span>
+                  {{ item.nomor || '-' }}
+                </td>
+
+                <td>
+                  <div
+                    v-if="item.jadwal?.length"
+                    style="display: flex; flex-wrap: wrap; gap: 6px">
+                    <span
+                      v-for="jadwal in item.jadwal"
+                      :key="jadwal.id_jadwal"
+                      class="badge badge-primary">
+                      {{ jadwal.mata_pelajaran?.nama || '-' }}
+                    </span>
+                  </div>
 
                   <span v-else>-</span>
                 </td>
@@ -245,19 +382,27 @@ const handleDelete = (id) => {
                   <div class="action-group">
                     <button
                       class="btn-icon"
-                      @click="handleOpenModal('edit', item)"
-                    >
+                      @click="handleOpenModal('edit', item)">
                       <Edit2 :size="16" />
                     </button>
 
                     <button
                       class="btn-icon text-danger"
-                      @click="handleDelete(item.id)"
-                    >
+                      @click="handleDelete(item.id_guru)">
                       <Trash2 :size="16" />
                     </button>
                   </div>
                 </td>
+              </tr>
+
+              <tr v-if="!loading && filteredGuru.length === 0">
+                <td colspan="7" class="empty-state">
+                  Data guru tidak ditemukan
+                </td>
+              </tr>
+
+              <tr v-if="loading">
+                <td colspan="7" class="empty-state">Memuat data...</td>
               </tr>
             </tbody>
           </table>
@@ -266,603 +411,709 @@ const handleDelete = (id) => {
     </main>
 
     <!-- MODAL -->
-    <div
-      v-if="isModalOpen"
-      class="modal-overlay"
-      @click="closeModal"
-    >
+    <div v-if="isModalOpen" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h3 class="modal-title">
-            {{
-              modalMode === 'add'
-                ? 'Tambah Guru Baru'
-                : 'Edit Data Guru'
-            }}
+            {{ modalMode === 'add' ? 'Tambah Guru' : 'Edit Guru' }}
           </h3>
 
-          <button
-            class="modal-close-btn"
-            @click="closeModal"
-          >
+          <button class="modal-close-btn" @click="closeModal">
             <X :size="20" />
           </button>
         </div>
 
-        <div class="modal-body">
-          <form @submit.prevent="handleSubmit">
-            <div class="form-group">
-              <label class="form-label">
-                Nama Lengkap (beserta gelar)
-              </label>
+        <form @submit.prevent="handleSubmit">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label">Nama Lengkap</label>
 
               <input
-                type="text"
-                class="form-input"
                 v-model="formData.nama"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                NIK / NIP
-              </label>
-
-              <input
                 type="text"
                 class="form-input"
-                v-model="formData.nik"
-                required
-              />
+                required />
             </div>
 
             <div class="form-group">
-              <label class="form-label">
-                Email
-              </label>
+              <label class="form-label">NIK / NIP</label>
 
               <input
+                v-model="formData.nik"
+                type="text"
+                class="form-input"
+                required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nomor HP</label>
+
+              <input
+                v-model="formData.nomor"
+                type="text"
+                class="form-input"
+                required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email</label>
+
+              <input
+                v-model="formData.email"
                 type="email"
                 class="form-input"
-                v-model="formData.email"
-                required
-              />
+                required />
             </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                Nomor HP
-              </label>
+            <div v-if="modalMode === 'add'" class="form-group">
+              <label class="form-label">Password</label>
 
               <input
-                type="text"
+                v-model="formData.password"
+                type="password"
                 class="form-input"
-                v-model="formData.hp"
-                required
-              />
+                required />
             </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                Jurusan Pengampu (Opsional)
-              </label>
+            <div class="form-group full-width">
+              <label class="form-label">Jurusan Pengampu</label>
+              <select v-model="formData.id_jurusan" class="form-input">
+                <option value="">-- Tidak Spesifik --</option>
 
-              <select
-                class="form-input"
-                v-model="formData.jurusan"
-              >
-                <option value="">
-                  -- Tidak Spesifik / Umum --
+                <option
+                  v-for="jurusan in jurusanList"
+                  :key="jurusan.id_jurusan"
+                  :value="jurusan.id_jurusan">
+                  {{ jurusan.nama }}
                 </option>
-
-                <option value="RPL">RPL</option>
-                <option value="DKV">DKV</option>
-                <option value="Animasi">Animasi</option>
               </select>
             </div>
+          </div>
 
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-outline"
-                @click="closeModal"
-              >
-                Batal
-              </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" @click="closeModal">
+              Batal
+            </button>
 
-              <button
-                type="submit"
-                class="btn btn-primary"
-              >
-                Simpan
-              </button>
-            </div>
-          </form>
-        </div>
+            <button type="submit" class="btn btn-primary" :disabled="loading">
+              Simpan
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
-<style>
-:root {
-  --primary: #FF6A3D;
-  --primary-hover: #E85B31;
-  --primary-light: #FFF0EB;
+<style scoped>
+  :root {
+    --primary: #ff6a3d;
+    --primary-hover: #e85b31;
+    --primary-light: #fff0eb;
 
-  --secondary: #2C3E50;
-  --text-main: #334155;
-  --text-muted: #64748B;
+    --secondary: #2c3e50;
 
-  --bg-app: #F8FAFC;
-  --bg-surface: #FFFFFF;
+    --text-main: #334155;
+    --text-muted: #64748b;
 
-  --success: #10B981;
-  --success-light: #D1FAE5;
+    --bg-app: #f8fafc;
+    --bg-surface: #ffffff;
 
-  --warning: #F59E0B;
-  --warning-light: #FEF3C7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
 
-  --danger: #EF4444;
-  --danger-light: #FEE2E2;
+    --border: #e2e8f0;
 
-  --border: #E2E8F0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.15);
 
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
-               0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius-md: 12px;
+    --radius-lg: 24px;
 
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-               0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-  --shadow-orange: 0 10px 15px -3px rgba(255, 106, 61, 0.2);
-
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg-app);
-  color: var(--text-main);
-}
-
-/* Layout */
-.app-container {
-  display: flex;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  margin-left: 260px;
-}
-
-/* Header */
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  color: var(--secondary);
-}
-
-.page-subtitle {
-  margin-top: 0.3rem;
-  color: var(--text-muted);
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius-full);
-
-  padding: 0.5rem 1rem;
-  width: 300px;
-}
-
-.search-icon {
-  color: var(--text-muted);
-  margin-right: 0.5rem;
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 100%;
-}
-
-.notification-btn {
-  position: relative;
-
-  width: 42px;
-  height: 42px;
-
-  border-radius: 50%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.notification-dot {
-  position: absolute;
-  top: 9px;
-  right: 10px;
-
-  width: 8px;
-  height: 8px;
-
-  background: var(--danger);
-  border-radius: 50%;
-}
-
-.profile-menu {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.profile-name {
-  font-weight: 600;
-}
-
-.profile-role {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.profile-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
-
-/* Card */
-.card {
-  background: var(--bg-surface);
-
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-
-  border: 1px solid var(--border);
-
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-}
-
-.card-subtitle {
-  margin-top: 0.3rem;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-/* Button */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.5rem;
-
-  border: none;
-  cursor: pointer;
-
-  padding: 0.75rem 1.2rem;
-
-  border-radius: var(--radius-md);
-
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
-
-.btn-outline {
-  border: 1px solid var(--border);
-  background: white;
-}
-
-.btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-/* Table */
-.table-container {
-  overflow-x: auto;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: var(--bg-app);
-
-  padding: 1rem 1.5rem;
-
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  color: var(--text-muted);
-
-  border-bottom: 1px solid var(--border);
-}
-
-td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr:hover td {
-  background: #fcfcfc;
-}
-
-/* Badge */
-.badge {
-  display: inline-block;
-
-  padding: 0.3rem 0.7rem;
-
-  border-radius: var(--radius-full);
-
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-primary {
-  background: var(--primary-light);
-  color: var(--primary);
-}
-
-/* Action */
-.action-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 38px;
-  height: 38px;
-
-  border-radius: var(--radius-md);
-
-  color: var(--text-muted);
-
-  transition: var(--transition);
-}
-
-.btn-icon:hover {
-  background: var(--bg-app);
-  color: var(--primary);
-}
-
-.text-danger {
-  color: var(--danger);
-}
-
-.text-danger:hover {
-  background: var(--danger-light);
-  color: var(--danger);
-}
-
-/* Form */
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-label {
-  display: block;
-
-  margin-bottom: 0.5rem;
-
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-
-  padding: 0.75rem 1rem;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-
-  background: #F8FAFC;
-
-  font-family: inherit;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  z-index: 1000;
-
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-  width: 100%;
-  max-width: 500px;
-
-  background: var(--bg-surface);
-
-  border-radius: var(--radius-lg);
-
-  padding: 2rem;
-
-  box-shadow: var(--shadow-lg);
-
-  animation: slideUp 0.3s ease;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  color: var(--secondary);
-}
-
-.modal-close-btn {
-  padding: 0.3rem;
-  border-radius: var(--radius-md);
-}
-
-.modal-close-btn:hover {
-  background: var(--bg-app);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-
-  margin-top: 2rem;
-}
-
-/* Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+    --transition: all 0.25s ease;
   }
 
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  body {
+    background: var(--bg-app);
+    font-family: sans-serif;
   }
-}
 
-/* Responsive */
-@media (max-width: 768px) {
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+
+  .sidebar {
+    width: 260px;
+
+    background: white;
+
+    border-right: 1px solid var(--border);
+
+    position: fixed;
+    inset: 0 auto 0 0;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 24px;
+  }
+
+  .logo-box {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    border-radius: 12px;
+  }
+
+  .brand-name {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .sidebar-role-badge {
+    padding: 0 24px 20px;
+  }
+
+  .role-text {
+    font-size: 12px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 0 16px;
+  }
+
+  .nav-list {
+    list-style: none;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+
+    color: var(--text-muted);
+
+    text-decoration: none;
+
+    transition: var(--transition);
+  }
+
+  .nav-link:hover {
+    background: #f8fafc;
+    color: var(--primary);
+  }
+
+  .nav-link.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .sidebar-footer {
+    padding: 24px;
+
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-logout {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    cursor: pointer;
+
+    color: var(--danger);
+
+    background: transparent;
+  }
+
+  .btn-logout:hover {
+    background: var(--danger-light);
+  }
+
+  /* MAIN */
+
   .main-content {
-    margin-left: 0;
-    padding: 1rem;
+    flex: 1;
+
+    margin-left: 260px;
+
+    padding: 32px;
   }
+
+  /* HEADER */
 
   .top-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    margin-top: 4px;
+
+    color: var(--text-muted);
   }
 
   .header-right {
-    width: 100%;
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
   .search-bar {
+    width: 320px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: white;
+  }
+
+  .search-input {
     width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+  }
+
+  .search-icon {
+    margin-right: 8px;
+
+    color: var(--text-muted);
+  }
+
+  .notification-btn {
+    position: relative;
+
+    width: 46px;
+    height: 46px;
+
+    border: 1px solid var(--border);
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+  }
+
+  .notification-dot {
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: red;
+  }
+
+  .profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .profile-name {
+    font-weight: 600;
+  }
+
+  .profile-role {
+    font-size: 12px;
+
+    color: var(--text-muted);
+  }
+
+  .profile-avatar {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 50%;
+  }
+
+  /* CARD */
+
+  .card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    padding: 24px;
+
+    box-shadow: var(--shadow-sm);
   }
 
   .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 24px;
   }
-}
+
+  .card-subtitle {
+    margin-top: 4px;
+
+    color: var(--text-muted);
+  }
+
+  /* BUTTON */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-outline {
+    border: 1px solid var(--border);
+
+    background: white;
+  }
+
+  /* TABLE */
+
+  .table-container {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  table {
+    width: 100%;
+
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #f8fafc;
+
+    padding: 16px;
+
+    text-align: left;
+
+    color: var(--text-muted);
+  }
+
+  td {
+    padding: 16px;
+
+    border-top: 1px solid var(--border);
+  }
+
+  .badge {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-primary {
+    background: var(--primary-light);
+
+    color: var(--primary);
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+  }
+
+  .btn-icon:hover {
+    background: #f1f5f9;
+  }
+
+  .text-danger {
+    color: var(--danger);
+  }
+
+  .text-danger:hover {
+    background: var(--danger-light);
+  }
+
+  .empty-state {
+    text-align: center;
+
+    padding: 32px;
+
+    color: var(--text-muted);
+  }
+
+  /* MODAL */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.55);
+
+    backdrop-filter: blur(4px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    z-index: 999;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 850px;
+
+    max-height: 90vh;
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 32px;
+
+    box-shadow: var(--shadow-lg);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 28px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .modal-close-btn {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+  }
+
+  .modal-close-btn:hover {
+    background: #f1f5f9;
+  }
+
+  /* FORM */
+
+  .form-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 20px;
+  }
+
+  .form-group.full-width {
+    grid-column: span 2;
+  }
+
+  .form-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    outline: none;
+
+    transition: var(--transition);
+  }
+
+  .form-input:focus {
+    border-color: var(--primary);
+
+    background: white;
+
+    box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.1);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    margin-top: 32px;
+
+    padding-top: 24px;
+
+    border-top: 1px solid var(--border);
+  }
+
+  /* RESPONSIVE */
+
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+
+    .main-content {
+      margin-left: 0;
+
+      padding: 20px;
+    }
+
+    .top-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 20px;
+    }
+
+    .header-right {
+      width: 100%;
+
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      width: 100%;
+    }
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 16px;
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+      grid-column: span 1;
+    }
+  }
 </style>

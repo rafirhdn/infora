@@ -3,15 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Kelas extends Model
 {
-    protected $table = 'kelas';
+    use SoftDeletes;
 
+    protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
 
     public $incrementing = true;
-
     public $timestamps = true;
 
     protected $fillable = [
@@ -19,6 +20,7 @@ class Kelas extends Model
         'tingkat',
         'id_jurusan'
     ];
+    
 
     public function jurusan()
     {
@@ -54,5 +56,10 @@ class Kelas extends Model
             'id_kelas',
             'id_kelas'
         );
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'id_kelas';
     }
 }

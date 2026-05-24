@@ -1,159 +1,293 @@
 <script setup>
-import { ref } from 'vue'
-import {
-  LayoutDashboard,
-  BookOpen,
-  Building2,
-  Calendar,
-  Users,
-  GraduationCap,
-  ClipboardList,
-  User,
-  Bell,
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  X
-} from 'lucide-vue-next'
+  import { ref, onMounted } from 'vue'
 
-definePageMeta({
-  layout: 'admin'
-})
+  import {
+    LayoutDashboard,
+    BookOpen,
+    Building2,
+    Calendar,
+    Users,
+    GraduationCap,
+    ClipboardList,
+    User,
+    Bell,
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    X,
+    Check,
+    LogOut
+  } from 'lucide-vue-next'
 
-/* =========================
-   SIDEBAR MENU
-========================= */
-const adminMenus = [
-  { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
-  { label: 'Jurusan', path: 'jurusan', icon: Building2 },
-  { label: 'Kelas', path: 'kelas', icon: BookOpen },
-  { label: 'Semester', path: 'semester', icon: Calendar },
-  { label: 'Guru', path: 'guru', icon: Users },
-  { label: 'Siswa', path: 'siswa', icon: GraduationCap },
-  { label: 'Jadwal', path: 'jadwal', icon: ClipboardList },
-  { label: 'Profil Saya', path: 'profile', icon: User },
-]
+  definePageMeta({
+    layout: false
+  })
 
-/* =========================
-   DATA JURUSAN
-========================= */
-const initialJurusan = [
-  {
-    id: 1,
-    nama: 'RPL',
-    deskripsi: 'Rekayasa Perangkat Lunak',
-    jumlahKelas: 6,
-    jumlahSiswa: 180,
-    status: 'Aktif'
-  },
-  {
-    id: 2,
-    nama: 'DKV',
-    deskripsi: 'Desain Komunikasi Visual',
-    jumlahKelas: 5,
-    jumlahSiswa: 150,
-    status: 'Aktif'
-  },
-  {
-    id: 3,
-    nama: 'Animasi',
-    deskripsi: 'Animasi 2D & 3D',
-    jumlahKelas: 6,
-    jumlahSiswa: 182,
-    status: 'Aktif'
-  }
-]
+  const api = useApi()
 
-const jurusanList = ref(initialJurusan)
-
-/* =========================
-   MODAL
-========================= */
-const isModalOpen = ref(false)
-const modalMode = ref('add')
-const selectedId = ref(null)
-
-const formData = ref({
-  nama: '',
-  deskripsi: ''
-})
-
-const handleOpenModal = (mode, data = null) => {
-  modalMode.value = mode
-
-  if (data) {
-    selectedId.value = data.id
-
-    formData.value = {
-      nama: data.nama,
-      deskripsi: data.deskripsi
+  const adminMenus = [
+    {
+      label: 'Dashboard',
+      path: '/manajemenAkademi/tataUsaha/dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      label: 'Jurusan',
+      path: '/manajemenAkademi/tataUsaha/jurusan',
+      icon: Building2
+    },
+    {
+      label: 'Kelas',
+      path: '/manajemenAkademi/tataUsaha/kelas',
+      icon: BookOpen
+    },
+    {
+      label: 'Semester',
+      path: '/manajemenAkademi/tataUsaha/semester',
+      icon: Calendar
+    },
+    {
+      label: 'Guru',
+      path: '/manajemenAkademi/tataUsaha/guru',
+      icon: Users
+    },
+    {
+      label: 'Siswa',
+      path: '/manajemenAkademi/tataUsaha/siswa',
+      icon: GraduationCap
+    },
+    {
+      label: 'Jadwal',
+      path: '/manajemenAkademi/tataUsaha/jadwal',
+      icon: ClipboardList
+    },
+    {
+      label: 'Profil Saya',
+      path: '/manajemenAkademi/tataUsaha/profile',
+      icon: User
     }
-  } else {
-    selectedId.value = null
+  ]
 
-    formData.value = {
-      nama: '',
-      deskripsi: ''
+  const jurusanList = ref([])
+  const filteredJurusan = ref([])
+  const searchQuery = ref('')
+  const isLoading = ref(false)
+  const isModalOpen = ref(false)
+  const modalMode = ref('add')
+  const selectedId = ref(null)
+
+  const formData = ref({
+    nama: '',
+    deskripsi: ''
+  })
+
+  const fetchJurusan = async () => {
+    try {
+      isLoading.value = true
+
+      const response = await api('/jurusan')
+
+      const data = Array.isArray(response) ? response : response.data || []
+
+      jurusanList.value = data.map((item) => ({
+        id: item.id_jurusan,
+        nama: item.nama,
+        deskripsi: item.deskripsi,
+
+        // HASIL withCount('kelas')
+        jumlahKelas: item.kelas_count || 0,
+
+        // HASIL withCount('siswa')
+        jumlahSiswa: item.siswa_count || 0,
+
+        status: item.status === 'aktif' ? 'Aktif' : 'Nonaktif'
+      }))
+
+      filteredJurusan.value = jurusanList.value
+    } catch (error) {
+      console.error('Gagal mengambil data jurusan:', error)
+    } finally {
+      isLoading.value = false
     }
   }
 
-  isModalOpen.value = true
-}
+  const handleNonaktif = async (id) => {
+    try {
+      await api(`/jurusan/${id}/nonaktifkan`, {
+        method: 'PATCH'
+      })
 
-const handleCloseModal = () => {
-  isModalOpen.value = false
-}
+      await fetchJurusan()
+    } catch (error) {
+      console.error('Gagal menonaktifkan jurusan:', error)
+    }
+  }
 
-const handleSubmit = () => {
-  if (modalMode.value === 'add') {
-    jurusanList.value.push({
-      id: Date.now(),
-      nama: formData.value.nama,
-      deskripsi: formData.value.deskripsi,
-      jumlahKelas: 0,
-      jumlahSiswa: 0,
-      status: 'Aktif'
+  const handleAktif = async (id) => {
+    try {
+      await api(`/jurusan/${id}/aktifkan`, {
+        method: 'PATCH'
+      })
+
+      await fetchJurusan()
+    } catch (error) {
+      console.error('Gagal mengaktifkan jurusan:', error)
+    }
+  }
+
+  const handleSearch = () => {
+    const keyword = searchQuery.value.toLowerCase()
+
+    filteredJurusan.value = jurusanList.value.filter((item) => {
+      return (
+        item.nama.toLowerCase().includes(keyword) ||
+        item.deskripsi.toLowerCase().includes(keyword)
+      )
     })
-  } else {
-    jurusanList.value = jurusanList.value.map((item) => {
-      if (item.id === selectedId.value) {
-        return {
-          ...item,
-          nama: formData.value.nama,
-          deskripsi: formData.value.deskripsi
+  }
+
+  const handleOpenModal = (mode, data = null) => {
+    modalMode.value = mode
+
+    if (data) {
+      selectedId.value = data.id
+
+      formData.value = {
+        nama: data.nama,
+        deskripsi: data.deskripsi
+      }
+    } else {
+      selectedId.value = null
+
+      formData.value = {
+        nama: '',
+        deskripsi: ''
+      }
+    }
+
+    isModalOpen.value = true
+  }
+
+  const handleCloseModal = () => {
+    isModalOpen.value = false
+  }
+
+  const handleSubmit = async () => {
+    try {
+      const isDuplicate = jurusanList.value.some((item) => {
+        if (modalMode.value === 'edit' && item.id === selectedId.value) {
+          return false
         }
+
+        return (
+          item.nama.toLowerCase().trim() ===
+          formData.value.nama.toLowerCase().trim()
+        )
+      })
+
+      if (isDuplicate) {
+        alert('Nama jurusan sudah ada!')
+        return
       }
 
-      return item
-    })
+      if (modalMode.value === 'add') {
+        await api('/jurusan', {
+          method: 'POST',
+
+          body: {
+            nama: formData.value.nama,
+            deskripsi: formData.value.deskripsi,
+            status: 'aktif'
+          }
+        })
+      } else {
+        await api(`/jurusan/${selectedId.value}`, {
+          method: 'PUT',
+
+          body: {
+            nama: formData.value.nama,
+            deskripsi: formData.value.deskripsi
+          }
+        })
+      }
+
+      await fetchJurusan()
+
+      handleCloseModal()
+    } catch (error) {
+      console.error('Gagal menyimpan data:', error)
+    }
   }
 
-  handleCloseModal()
-}
+  const handleDelete = async (id) => {
+    const confirmed = confirm('Yakin ingin menghapus jurusan ini?')
 
-const handleDelete = (id) => {
-  jurusanList.value = jurusanList.value.filter(
-    (item) => item.id !== id
-  )
-}
+    if (!confirmed) return
+
+    try {
+      await api(`/jurusan/${id}`, {
+        method: 'DELETE'
+      })
+
+      await fetchJurusan()
+    } catch (error) {
+      console.error('Gagal menghapus data:', error)
+    }
+  }
+
+  onMounted(() => {
+    fetchJurusan()
+  })
 </script>
 
 <template>
   <div class="app-container">
-    <!-- Sidebar -->
-    <Sidebar role="Admin / TU" :menus="adminMenus" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <GraduationCap :size="28" />
+        </div>
 
-    <!-- Main Content -->
+        <h2 class="brand-name">EduManage</h2>
+      </div>
+
+      <div class="sidebar-role-badge">
+        <span class="badge badge-primary role-text">Admin / TU</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li v-for="(menu, index) in adminMenus" :key="index">
+            <NuxtLink :to="menu.path" class="nav-link" active-class="active">
+              <component :is="menu.icon" :size="20" />
+
+              <span>
+                {{ menu.label }}
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout">
+          <LogOut :size="20" />
+
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
     <main class="main-content">
       <!-- HEADER -->
       <header class="top-header">
-        <div class="header-left">
+        <div>
           <h1 class="page-title">Data Jurusan</h1>
 
-          <p class="page-subtitle">
-            Kelola program keahlian / jurusan sekolah
-          </p>
+          <p class="page-subtitle">Kelola program keahlian / jurusan sekolah</p>
         </div>
 
         <div class="header-right">
@@ -161,10 +295,11 @@ const handleDelete = (id) => {
             <Search :size="18" class="search-icon" />
 
             <input
+              v-model="searchQuery"
               type="text"
-              placeholder="Search anything..."
+              placeholder="Cari jurusan..."
               class="search-input"
-            />
+              @input="handleSearch" />
           </div>
 
           <button class="notification-btn">
@@ -175,39 +310,40 @@ const handleDelete = (id) => {
 
           <div class="profile-menu">
             <div class="profile-info">
-              <span class="profile-name">
-                Admin Utama
-              </span>
+              <span class="profile-name">Admin Utama</span>
 
-              <span class="profile-role">
-                Admin / TU
-              </span>
+              <span class="profile-role">Admin / TU</span>
             </div>
 
             <img
-              src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
-              alt="Profile"
               class="profile-avatar"
-            />
+              src="https://ui-avatars.com/api/?name=Admin+Utama&background=FF6A3D&color=fff"
+              alt="Profile" />
           </div>
         </div>
       </header>
 
-      <!-- TABLE -->
+      <!-- CARD -->
       <div class="card">
         <div class="card-header">
-          <h3>Daftar Jurusan</h3>
+          <div>
+            <h3>Daftar Jurusan</h3>
 
-          <button
-            class="btn btn-primary"
-            @click="handleOpenModal('add')"
-          >
+            <p class="card-subtitle">Seluruh data jurusan sekolah</p>
+          </div>
+
+          <button class="btn btn-primary" @click="handleOpenModal('add')">
             <Plus :size="18" />
+
             Tambah Jurusan
           </button>
         </div>
 
-        <div class="table-container">
+        <!-- LOADING -->
+        <div v-if="isLoading" class="loading-box">Memuat data...</div>
+
+        <!-- TABLE -->
+        <div v-else class="table-container">
           <table>
             <thead>
               <tr>
@@ -222,52 +358,77 @@ const handleDelete = (id) => {
             </thead>
 
             <tbody>
-              <tr
-                v-for="(item, index) in jurusanList"
-                :key="item.id"
-              >
+              <tr v-for="(item, index) in filteredJurusan" :key="item.id">
                 <td>{{ index + 1 }}</td>
 
                 <td>
-                  <strong>{{ item.nama }}</strong>
+                  <strong>
+                    {{ item.nama }}
+                  </strong>
                 </td>
 
-                <td>{{ item.deskripsi }}</td>
+                <td>
+                  {{ item.deskripsi }}
+                </td>
 
-                <td>{{ item.jumlahKelas }}</td>
+                <td>
+                  {{ item.jumlahKelas }}
+                </td>
 
-                <td>{{ item.jumlahSiswa }}</td>
+                <td>
+                  {{ item.jumlahSiswa }}
+                </td>
 
                 <td>
                   <span
                     :class="[
                       'badge',
-                      item.status === 'Aktif'
-                        ? 'badge-success'
-                        : 'badge-danger'
-                    ]"
-                  >
+                      item.status === 'Aktif' ? 'badge-success' : 'badge-danger'
+                    ]">
                     {{ item.status }}
                   </span>
                 </td>
 
                 <td>
                   <div class="action-group">
+                    <!-- EDIT -->
                     <button
                       class="btn-icon"
-                      @click="handleOpenModal('edit', item)"
-                    >
+                      @click="handleOpenModal('edit', item)">
                       <Edit2 :size="16" />
                     </button>
 
+                    <!-- NONAKTIF / AKTIF -->
+                    <button
+                      v-if="item.status === 'Aktif'"
+                      class="btn-icon text-warning"
+                      @click="handleNonaktif(item.id)">
+                      <X :size="16" />
+                    </button>
+
+                    <button
+                      v-else
+                      class="btn-icon text-success"
+                      @click="handleAktif(item.id)">
+                      <Check :size="16" />
+                    </button>
+
+                    <!-- DELETE -->
                     <button
                       class="btn-icon text-danger"
-                      @click="handleDelete(item.id)"
-                    >
+                      :disabled="item.status === 'Aktif'"
+                      :class="{
+                        'btn-disabled': item.status === 'Aktif'
+                      }"
+                      @click="handleDelete(item.id)">
                       <Trash2 :size="16" />
                     </button>
                   </div>
                 </td>
+              </tr>
+
+              <tr v-if="filteredJurusan.length === 0">
+                <td colspan="7" class="empty-table">Data jurusan kosong</td>
               </tr>
             </tbody>
           </table>
@@ -276,28 +437,14 @@ const handleDelete = (id) => {
     </main>
 
     <!-- MODAL -->
-    <div
-      v-if="isModalOpen"
-      class="modal-overlay"
-      @click="handleCloseModal"
-    >
-      <div
-        class="modal-content"
-        @click.stop
-      >
+    <div v-if="isModalOpen" class="modal-overlay" @click="handleCloseModal">
+      <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h3 class="modal-title">
-            {{
-              modalMode === 'add'
-                ? 'Tambah Jurusan Baru'
-                : 'Edit Jurusan'
-            }}
+            {{ modalMode === 'add' ? 'Tambah Jurusan Baru' : 'Edit Jurusan' }}
           </h3>
 
-          <button
-            class="modal-close-btn"
-            @click="handleCloseModal"
-          >
+          <button class="modal-close-btn" @click="handleCloseModal">
             <X :size="20" />
           </button>
         </div>
@@ -305,48 +452,36 @@ const handleDelete = (id) => {
         <div class="modal-body">
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
-              <label class="form-label">
-                Nama Jurusan (Singkatan)
-              </label>
+              <label class="form-label">Nama Jurusan</label>
 
               <input
                 v-model="formData.nama"
                 type="text"
                 class="form-input"
                 placeholder="Contoh: RPL"
-                required
-              />
+                required />
             </div>
 
             <div class="form-group">
-              <label class="form-label">
-                Deskripsi / Nama Lengkap
-              </label>
+              <label class="form-label">Deskripsi</label>
 
               <input
                 v-model="formData.deskripsi"
                 type="text"
                 class="form-input"
                 placeholder="Contoh: Rekayasa Perangkat Lunak"
-                required
-              />
+                required />
             </div>
 
             <div class="modal-footer">
               <button
                 type="button"
                 class="btn btn-outline"
-                @click="handleCloseModal"
-              >
+                @click="handleCloseModal">
                 Batal
               </button>
 
-              <button
-                type="submit"
-                class="btn btn-primary"
-              >
-                Simpan
-              </button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
           </form>
         </div>
@@ -355,456 +490,552 @@ const handleDelete = (id) => {
   </div>
 </template>
 
-<style>
-:root {
-  --primary: #FF6A3D;
-  --primary-hover: #E85B31;
-  --primary-light: #FFF0EB;
-
-  --secondary: #2C3E50;
-  --text-main: #334155;
-  --text-muted: #64748B;
-
-  --bg-app: #F8FAFC;
-  --bg-surface: #FFFFFF;
-
-  --success: #10B981;
-  --success-light: #D1FAE5;
-
-  --warning: #F59E0B;
-  --warning-light: #FEF3C7;
-
-  --danger: #EF4444;
-  --danger-light: #FEE2E2;
-
-  --border: #E2E8F0;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-
-  --shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
-
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-  --shadow-orange:
-    0 10px 15px -3px rgba(255, 106, 61, 0.2);
-
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  --transition:
-    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg-app);
-  color: var(--text-main);
-}
-
-/* Layout */
-.app-container {
-  display: flex;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  margin-left: 260px;
-}
-
-/* Header */
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.page-subtitle {
-  margin-top: 0.3rem;
-  color: var(--text-muted);
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-
-  background: var(--bg-surface);
+<style scoped>
+  :root {
+    --primary: #ff6a3d;
+    --primary-hover: #e85b31;
+    --primary-light: #fff0eb;
 
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-
-  padding: 0.5rem 1rem;
-  width: 300px;
-}
-
-.search-icon {
-  color: var(--text-muted);
-  margin-right: 0.5rem;
-}
+    --text-main: #334155;
+    --text-muted: #64748b;
 
-.search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 100%;
-}
+    --bg-app: #f8fafc;
 
-.notification-btn {
-  position: relative;
+    --success: #10b981;
+    --success-light: #d1fae5;
 
-  width: 40px;
-  height: 40px;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
 
-  border-radius: 50%;
+    --border: #e2e8f0;
 
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.15);
 
-.notification-dot {
-  position: absolute;
-  top: 8px;
-  right: 10px;
+    --transition: all 0.25s ease;
+  }
 
-  width: 8px;
-  height: 8px;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-  background: var(--danger);
-  border-radius: 50%;
-}
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-app);
+  }
 
-.profile-menu {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+  .sidebar {
+    width: 260px;
+    background: white;
+    border-right: 1px solid var(--border);
 
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
+    position: fixed;
+    inset: 0 auto 0 0;
 
-.profile-name {
-  font-weight: 600;
-}
+    display: flex;
+    flex-direction: column;
+  }
 
-.profile-role {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-.profile-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
+    padding: 24px;
+  }
 
-/* Card */
-.card {
-  background: var(--bg-surface);
+  .logo-box {
+    width: 42px;
+    height: 42px;
 
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  border: 1px solid var(--border);
+    background: var(--primary-light);
+    color: var(--primary);
 
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-}
+    border-radius: 12px;
+  }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
+  .brand-name {
+    font-size: 22px;
+    font-weight: 700;
+  }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  .sidebar-role-badge {
+    padding: 0 24px 20px;
+  }
 
-  margin-bottom: 1.5rem;
-}
+  .role-text {
+    font-size: 12px;
+  }
 
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  .sidebar-nav {
+    flex: 1;
+    padding: 0 16px;
+  }
 
-  border: none;
-  cursor: pointer;
+  .nav-list {
+    list-style: none;
+  }
 
-  padding: 0.75rem 1.2rem;
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-  border-radius: var(--radius-md);
+    padding: 14px 16px;
 
-  font-weight: 500;
+    border-radius: 12px;
 
-  transition: var(--transition);
-}
+    text-decoration: none;
 
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
+    color: var(--text-muted);
 
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
+    transition: var(--transition);
+  }
 
-.btn-outline {
-  border: 1px solid var(--border);
-  background: white;
-}
+  .nav-link:hover {
+    background: #f8fafc;
+    color: var(--primary);
+  }
 
-.btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
+  .nav-link.active {
+    background: var(--primary);
+    color: white;
+  }
 
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  .sidebar-footer {
+    padding: 24px;
+    border-top: 1px solid var(--border);
+  }
 
-  width: 36px;
-  height: 36px;
+  .btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-  border-radius: var(--radius-md);
+    padding: 14px 16px;
 
-  color: var(--text-muted);
+    border: none;
+    border-radius: 12px;
 
-  transition: var(--transition);
-}
+    background: transparent;
 
-.btn-icon:hover {
-  background: var(--bg-app);
-  color: var(--primary);
-}
+    cursor: pointer;
 
-.text-danger {
-  color: var(--danger);
-}
+    color: var(--danger);
+  }
 
-.text-danger:hover {
-  background: var(--danger-light);
-  color: var(--danger);
-}
-
-/* Table */
-.table-container {
-  overflow-x: auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: var(--bg-app);
-
-  padding: 1rem 1.5rem;
-
-  text-align: left;
-
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  color: var(--text-muted);
-
-  border-bottom: 1px solid var(--border);
-}
-
-td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr:hover td {
-  background: #fcfcfc;
-}
-
-/* Badge */
-.badge {
-  display: inline-block;
-
-  padding: 0.3rem 0.8rem;
-
-  border-radius: var(--radius-full);
-
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background: var(--success-light);
-  color: var(--success);
-}
-
-.badge-danger {
-  background: var(--danger-light);
-  color: var(--danger);
-}
-
-/* Action */
-.action-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* Form */
-.form-group {
-  margin-bottom: 1.2rem;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-
-  padding: 0.75rem 1rem;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-
-  background: #F8FAFC;
-
-  transition: var(--transition);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--primary);
-
-  box-shadow:
-    0 0 0 3px rgba(255, 106, 61, 0.1);
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 1000;
-}
-
-.modal-content {
-  width: 100%;
-  max-width: 500px;
-
-  background: var(--bg-surface);
-
-  border-radius: var(--radius-lg);
-
-  padding: 2rem;
-
-  box-shadow: var(--shadow-lg);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.modal-close-btn {
-  padding: 0.3rem;
-  border-radius: var(--radius-md);
-}
-
-.modal-close-btn:hover {
-  background: var(--bg-app);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-
-  margin-top: 2rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
-    padding: 1rem;
+    flex: 1;
+    margin-left: 260px;
+    padding: 32px;
   }
 
   .top-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
   }
 
   .header-right {
-    width: 100%;
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
   .search-bar {
-    width: 100%;
+    width: 320px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: white;
   }
-}
+
+  .search-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+
+  .search-icon {
+    margin-right: 8px;
+    color: var(--text-muted);
+  }
+
+  .notification-btn {
+    position: relative;
+
+    width: 46px;
+    height: 46px;
+
+    border: 1px solid var(--border);
+    border-radius: 50%;
+
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification-dot {
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: red;
+  }
+
+  .profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .profile-role {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .profile-avatar {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 50%;
+  }
+
+  .card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    padding: 24px;
+
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 24px;
+  }
+
+  .card-subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-outline {
+    border: 1px solid var(--border);
+    background: white;
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .btn-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-disabled:hover {
+    background: transparent !important;
+  }
+
+  th {
+    background: #f8fafc;
+
+    padding: 16px;
+
+    text-align: left;
+
+    color: var(--text-muted);
+  }
+
+  td {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .badge {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-primary {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .badge-success {
+    background: var(--success-light);
+    color: var(--success);
+  }
+
+  .badge-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-icon:hover {
+    background: #f1f5f9;
+  }
+
+  .text-danger {
+    color: var(--danger);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.55);
+
+    backdrop-filter: blur(4px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    z-index: 999;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 500px;
+
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 32px;
+
+    box-shadow: var(--shadow-lg);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 28px;
+  }
+
+  .text-warning {
+    color: #f59e0b;
+  }
+
+  .text-success {
+    color: #10b981;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .modal-close-btn {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    outline: none;
+  }
+
+  .form-input:focus {
+    border-color: var(--primary);
+
+    background: white;
+
+    box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.1);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    margin-top: 32px;
+
+    padding-top: 24px;
+
+    border-top: 1px solid var(--border);
+  }
+
+  .loading-box,
+  .empty-table {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .top-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 20px;
+    }
+
+    .header-right {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      width: 100%;
+    }
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 16px;
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+  }
 </style>
