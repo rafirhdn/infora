@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // Layout halaman
+  // Layout page
   definePageMeta({
     layout: 'authentication'
   })
@@ -24,7 +24,7 @@
         <!-- Input Box -->
         <div>
           <input
-            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-woodsmoke-950 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in"
+            class="w-full px-3.5 py-1.5 tracking-tight outline-none border-2 border-line-faint rounded-sm text-ink-base-dark placeholder:text-ink-muted-dark hover:bg-canvas-hover hover:border-flamingo-500 focus:border-flamingo-500 focus:bg-surface-canvas transition-all duration-150 ease-in-out"
             type="email"
             placeholder="Email" />
         </div>
@@ -32,7 +32,7 @@
         <!-- Button -->
         <div>
           <button
-            class="w-full font-medium py-2 tracking-tight rounded-sm cursor-pointer bg-woodsmoke-950 text-ink-base-light hover:bg-flamingo-500 transition-all duration-150 ease-in"
+            class="w-full font-medium py-2 tracking-tight rounded-sm cursor-pointer bg-flamingo-500 text-ink-base-light hover:bg-flamingo-600 transition-all duration-150 ease-in-out"
             type="submit">
             Kirim
           </button>
@@ -44,7 +44,7 @@
         <span class="text-base font-normal text-ink-muted-dark">
           Ingat password anda?
           <NuxtLink
-            class="font-medium text-ink-base-dark hover:underline underline-offset-2 transition-all duration-150 ease-in"
+            class="font-medium text-ink-base-dark hover:underline underline-offset-2 transition-all duration-150 ease-in-out"
             to="/autentikasi/login">
             Kembali
           </NuxtLink>
