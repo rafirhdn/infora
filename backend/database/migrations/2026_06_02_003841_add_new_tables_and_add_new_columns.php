@@ -28,13 +28,9 @@ return new class extends Migration
       $table->enum('peran', [
         'tata_usaha',
         'kepala_sekolah',
-        'wakil_kepala_sekolah_kurikulum',
-        'wakil_kepala_sekolah_sarana',
-        'wakil_kepala_sekolah_kesiswaan',
+        'wakil_kepala_sekolah',
         'wali_kelas',
         'guru',
-        'guru_bimbingan_konseling',
-        'guru_produktif',
         'siswa',
         'orang_tua',
         'pembina_ekstrakurikuler'
@@ -89,10 +85,8 @@ return new class extends Migration
     Schema::create('siswa', function (Blueprint $table) {
       $table->bigIncrements('id_siswa');
       $table->string('nis', 20)->unique();
-      $table->string('nama', 100);
       $table->string('tempat_lahir', 50)->nullable();
       $table->date('tanggal_lahir')->nullable();
-      $table->string('nomor', 15)->nullable();
       $table->unsignedBigInteger('id_kelas');
       $table->unsignedBigInteger('id_akun');
       $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
@@ -103,16 +97,48 @@ return new class extends Migration
 
     Schema::create('guru', function (Blueprint $table) {
       $table->bigIncrements('id_guru');
-      $table->string('nama', 100);
-      $table->string('nik', 20)->unique();
-      $table->string('email', 150)->unique();
-      $table->string('nomor', 15)->nullable();
+      $table->string('nip', 20)->unique();
       $table->unsignedBigInteger('id_jurusan')->nullable();
       $table->unsignedBigInteger('id_akun')->nullable();
       $table->foreign('id_jurusan')->references('id_jurusan')->on('jurusan')->onDelete('set null');
       $table->foreign('id_akun')->references('id_akun')->on('akun')->onDelete('set null');
       $table->timestamp('created_at')->useCurrent();
       $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+    });
+
+    Schema::create('tata_usaha', function (Blueprint $table) {
+      $table->bigIncrements('id_tata_usaha');
+      $table->unsignedBigInteger('id_akun');
+      $table->foreign('id_akun')->references('id_akun')->on('akun')->onDelete('cascade');
+      $table->timestamps();
+    });
+
+    Schema::create('kepala_sekolah', function (Blueprint $table) {
+      $table->bigIncrements('id_kepala_sekolah');
+      $table->string('nip', 20)->unique();
+      $table->unsignedBigInteger('id_akun');
+      $table->foreign('id_akun')->references('id_akun')->on('akun')->onDelete('cascade');
+      $table->timestamps();
+    });
+
+    Schema::create('wakil_kepala_sekolah', function (Blueprint $table) {
+      $table->bigIncrements('id_wakil_kepala_sekolah');
+      $table->enum('peran', ['prasarana', 'kesiswaan', 'kurikulum']);
+      $table->unsignedBigInteger('id_akun');
+      $table->foreign('id_akun')->references('id_akun')->on('akun')->onDelete('cascade');
+      $table->timestamps();
+    });
+
+    Schema::create('wali_kelas', function (Blueprint $table) {
+      $table->bigIncrements('id_wali_kelas');
+      $table->unsignedBigInteger('id_akun');
+      $table->unsignedBigInteger('id_kelas');
+      $table->unsignedBigInteger('id_semester');
+      $table->foreign('id_akun')->references('id_akun')->on('akun')->onDelete('cascade');
+      $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
+      $table->foreign('id_semester')->references('id_semester')->on('semester')->onDelete('cascade');
+      $table->unique(['id_kelas', 'id_semester']);
+      $table->timestamps();
     });
 
     Schema::create('mata_pelajaran', function (Blueprint $table) {
@@ -562,7 +588,6 @@ return new class extends Migration
     Schema::dropIfExists('ekstrakurikuler');
 
     // Bimbingan Konseling
-    Schema::dropIfExists('tanya_jawab');
     Schema::dropIfExists('pesan_obrolan');
     Schema::dropIfExists('ruang_obrolan');
     Schema::dropIfExists('jadwal_konseling');
@@ -572,30 +597,35 @@ return new class extends Migration
     Schema::dropIfExists('jenis_pelanggaran');
     Schema::dropIfExists('profil_guru_bk');
     Schema::dropIfExists('profil_siswa_bk');
+    Schema::dropIfExists('tanya_jawab');
 
-    // Absen
-    Schema::dropIfExists('qr');
+    // Absensi
     Schema::dropIfExists('catatan_absen');
     Schema::dropIfExists('sesi_absen');
+    Schema::dropIfExists('qr');
 
     // Akademik
     Schema::dropIfExists('rapor');
+    Schema::dropIfExists('nilai');
     Schema::dropIfExists('pengajuan_tugas');
     Schema::dropIfExists('tugas');
-    Schema::dropIfExists('nilai');
     Schema::dropIfExists('jadwal');
     Schema::dropIfExists('anggota_kelas');
     Schema::dropIfExists('orang_tua');
     Schema::dropIfExists('kompetensi');
     Schema::dropIfExists('mata_pelajaran');
+    Schema::dropIfExists('wali_kelas');
+    Schema::dropIfExists('kepala_sekolah');
+    Schema::dropIfExists('wakil_kepala_sekolah');
+    Schema::dropIfExists('tata_usaha');
     Schema::dropIfExists('guru');
     Schema::dropIfExists('siswa');
     Schema::dropIfExists('kelas');
     Schema::dropIfExists('semester');
     Schema::dropIfExists('jurusan');
 
-    // Auttentikasi
-    Schema::dropIfExists('akun');
+    // Autentikasi
     Schema::dropIfExists('personal_access_tokens');
+    Schema::dropIfExists('akun');
   }
 };
