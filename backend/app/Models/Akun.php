@@ -31,10 +31,10 @@ class Akun extends Authenticatable
 
   protected $hidden = [
     'kata_sandi',
-    'remember_token'
   ];
 
   protected $casts = [
+    'kata_sandi' => 'hashed',
     'created_at' => 'datetime',
     'updated_at' => 'datetime'
   ];
@@ -88,5 +88,10 @@ class Akun extends Authenticatable
   public function waliKelas()
   {
     return $this->hasMany(WaliKelas::class, 'id_akun', 'id_akun');
+  }
+
+  public function guruBk()
+  {
+    return $this->hasOne(ProfilGuruBK::class, 'id_akun', 'id_akun');
   }
 }

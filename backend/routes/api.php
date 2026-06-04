@@ -49,190 +49,189 @@ use App\Http\Controllers\Api\manajemenAkademik\waka\MonitoringController;
 
 // ------ //
 
-
-Route::post('/login', [AuthController::class, 'login']);
+Route::prefix('landing-page')->middleware('force.json')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/lupa-password/verify-email', [AuthController::class, 'verifyEmail']);
+    Route::post('/lupa-password/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/lupa-password/reset-password', [AuthController::class, 'resetPassword']);
+});
 
 // SISTEM MANAJEMEN AKADEMIK
 // ------ //
 Route::prefix('manajemen-akademik')
-    ->middleware([
-        'force.json',
-        'auth:sanctum'
-    ])
-    ->group(function () {
+  ->middleware([
+    'force.json',
+    'auth:sanctum'
+  ])
+  ->group(function () {
 
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
 
-        Route::prefix('admin')
-            ->middleware('role:tata_usaha')
-            ->group(function () {
+    Route::prefix('admin')
+      ->middleware('role:tata_usaha')
+      ->group(function () {
 
-                Route::apiResource('jurusan', JurusanController::class);
-                Route::apiResource('semester', SemesterController::class);
-                Route::apiResource('kelas', KelasController::class);
-                Route::apiResource('siswa', SiswaController::class);
-                Route::apiResource('guru', GuruController::class);
-                Route::apiResource('orang-tua', OrangTuaController::class);
-                Route::apiResource('mata-pelajaran', MataPelajaranController::class);
-                Route::apiResource('kompetensi', KompetensiController::class);
-                Route::apiResource('jadwal', JadwalController::class);
-                Route::apiResource('anggota-kelas', AnggotaKelasController::class);
+        Route::apiResource('jurusan', JurusanController::class);
+        Route::apiResource('semester', SemesterController::class);
+        Route::apiResource('kelas', KelasController::class);
+        Route::apiResource('siswa', SiswaController::class);
+        Route::apiResource('guru', GuruController::class);
+        Route::apiResource('orang-tua', OrangTuaController::class);
+        Route::apiResource('mata-pelajaran', MataPelajaranController::class);
+        Route::apiResource('kompetensi', KompetensiController::class);
+        Route::apiResource('jadwal', JadwalController::class);
+        Route::apiResource('anggota-kelas', AnggotaKelasController::class);
+      });
 
-            });
+    Route::prefix('guru')
+      ->middleware('role:guru_produktif,wali_kelas')
+      ->group(function () {
 
-        Route::prefix('guru')
-            ->middleware('role:guru_produktif,wali_kelas')
-            ->group(function () {
+        Route::get(
+          'jadwal',
+          [GuruJadwalController::class, 'index']
+        );
 
-                Route::get(
-                    'jadwal',
-                    [GuruJadwalController::class, 'index']
-                );
+        Route::apiResource(
+          'tugas',
+          GuruTugasController::class
+        );
 
-                Route::apiResource(
-                    'tugas',
-                    GuruTugasController::class
-                );
+        Route::apiResource(
+          'pengajuan-tugas',
+          GuruPengajuanTugasController::class
+        );
 
-                Route::apiResource(
-                    'pengajuan-tugas',
-                    GuruPengajuanTugasController::class
-                );
+        Route::apiResource(
+          'nilai',
+          GuruNilaiController::class
+        )->middleware('semester.active');
 
-                Route::apiResource(
-                    'nilai',
-                    GuruNilaiController::class
-                )->middleware('semester.active');
+        Route::get(
+          'siswa',
+          [GuruSiswaController::class, 'index']
+        );
 
-                Route::get(
-                    'siswa',
-                    [GuruSiswaController::class, 'index']
-                );
+        Route::get(
+          'rapor',
+          [GuruRaporController::class, 'index']
+        );
+      });
 
-                Route::get(
-                    'rapor',
-                    [GuruRaporController::class, 'index']
-                );
+    Route::prefix('siswa')
+      ->middleware('role:siswa')
+      ->group(function () {
 
-            });
+        Route::get(
+          'jadwal',
+          [SiswaJadwalController::class, 'index']
+        );
 
-        Route::prefix('siswa')
-            ->middleware('role:siswa')
-            ->group(function () {
+        Route::get(
+          'tugas',
+          [SiswaTugasController::class, 'index']
+        );
 
-                Route::get(
-                    'jadwal',
-                    [SiswaJadwalController::class, 'index']
-                );
+        Route::get(
+          'tugas/{tugas}',
+          [SiswaTugasController::class, 'show']
+        );
 
-                Route::get(
-                    'tugas',
-                    [SiswaTugasController::class, 'index']
-                );
+        Route::apiResource(
+          'pengajuan-tugas',
+          SiswaPengajuanTugasController::class
+        );
 
-                Route::get(
-                    'tugas/{tugas}',
-                    [SiswaTugasController::class, 'show']
-                );
+        Route::get(
+          'nilai',
+          [SiswaNilaiController::class, 'index']
+        );
 
-                Route::apiResource(
-                    'pengajuan-tugas',
-                    SiswaPengajuanTugasController::class
-                );
+        Route::get(
+          'rapor',
+          [SiswaRaporController::class, 'index']
+        );
+      });
 
-                Route::get(
-                    'nilai',
-                    [SiswaNilaiController::class, 'index']
-                );
+    Route::prefix('orang-tua')
+      ->middleware('role:orang_tua')
+      ->group(function () {
 
-                Route::get(
-                    'rapor',
-                    [SiswaRaporController::class, 'index']
-                );
+        Route::get(
+          'nilai',
+          [OrangTuaNilaiController::class, 'index']
+        );
 
-            });
+        Route::get(
+          'rapor',
+          [OrangTuaRaporController::class, 'index']
+        );
 
-        Route::prefix('orang-tua')
-            ->middleware('role:orang_tua')
-            ->group(function () {
+        Route::get(
+          'jadwal',
+          [OrangTuaJadwalController::class, 'index']
+        );
+      });
 
-                Route::get(
-                    'nilai',
-                    [OrangTuaNilaiController::class, 'index']
-                );
+    Route::prefix('waka')
+      ->middleware('role:wakil_kepala_sekolah')
+      ->group(function () {
 
-                Route::get(
-                    'rapor',
-                    [OrangTuaRaporController::class, 'index']
-                );
+        Route::apiResource(
+          'jadwal',
+          WakaJadwalController::class
+        );
 
-                Route::get(
-                    'jadwal',
-                    [OrangTuaJadwalController::class, 'index']
-                );
+        Route::apiResource(
+          'mata-pelajaran',
+          WakaMataPelajaranController::class
+        );
 
-            });
+        Route::apiResource(
+          'kompetensi',
+          WakaKompetensiController::class
+        );
 
-        Route::prefix('waka')
-            ->middleware('role:wakil_kepala_sekolah')
-            ->group(function () {
+        Route::get(
+          'nilai',
+          [WakaNilaiController::class, 'index']
+        );
 
-                Route::apiResource(
-                    'jadwal',
-                    WakaJadwalController::class
-                );
+        Route::get(
+          'nilai/{nilai}',
+          [WakaNilaiController::class, 'show']
+        );
 
-                Route::apiResource(
-                    'mata-pelajaran',
-                    WakaMataPelajaranController::class
-                );
+        Route::get(
+          'rapor',
+          [WakaRaporController::class, 'index']
+        );
 
-                Route::apiResource(
-                    'kompetensi',
-                    WakaKompetensiController::class
-                );
+        Route::get(
+          'rapor/{rapor}',
+          [WakaRaporController::class, 'show']
+        );
 
-                Route::get(
-                    'nilai',
-                    [WakaNilaiController::class, 'index']
-                );
+        Route::put(
+          'rapor/{rapor}',
+          [WakaRaporController::class, 'update']
+        );
 
-                Route::get(
-                    'nilai/{nilai}',
-                    [WakaNilaiController::class, 'show']
-                );
+        Route::get(
+          'monitoring/dashboard',
+          [MonitoringController::class, 'dashboard']
+        );
 
-                Route::get(
-                    'rapor',
-                    [WakaRaporController::class, 'index']
-                );
+        Route::get(
+          'monitoring/statistik-nilai',
+          [MonitoringController::class, 'statistikNilai']
+        );
 
-                Route::get(
-                    'rapor/{rapor}',
-                    [WakaRaporController::class, 'show']
-                );
-
-                Route::put(
-                    'rapor/{rapor}',
-                    [WakaRaporController::class, 'update']
-                );
-
-                Route::get(
-                    'monitoring/dashboard',
-                    [MonitoringController::class, 'dashboard']
-                );
-
-                Route::get(
-                    'monitoring/statistik-nilai',
-                    [MonitoringController::class, 'statistikNilai']
-                );
-
-                Route::get(
-                    'monitoring/rapor-belum-lengkap',
-                    [MonitoringController::class, 'raporBelumLengkap']
-                );
-
-            });
-    });
+        Route::get(
+          'monitoring/rapor-belum-lengkap',
+          [MonitoringController::class, 'raporBelumLengkap']
+        );
+      });
+  });
 // ------ //

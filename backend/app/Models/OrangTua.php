@@ -3,36 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrangTua extends Model
 {
-    protected $table = 'orang_tua';
+  use HasFactory;
 
-    protected $primaryKey = 'id_orang_tua';
+  protected $table = 'orang_tua';
 
-    public $timestamps = true;
+  protected $primaryKey = 'id_orang_tua';
 
-    protected $fillable = [
-        'hubungan',
-        'id_siswa',
-        'id_akun'
-    ];
+  public $timestamps = true;
 
-    public function siswa()
-    {
-        return $this->belongsTo(
-            Siswa::class,
-            'id_siswa',
-            'id_siswa'
-        );
-    }
+  protected $fillable = [
+    'hubungan',
+    'id_siswa',
+    'id_akun'
+  ];
 
-    public function akun()
-    {
-        return $this->belongsTo(
-            Akun::class,
-            'id_akun',
-            'id_akun'
-        );
-    }
+  public function siswa()
+  {
+    return $this->belongsTo(
+      Siswa::class,
+      'id_siswa',
+      'id_siswa'
+    );
+  }
+
+  public function akun()
+  {
+    return $this->belongsTo(
+      Akun::class,
+      'id_akun',
+      'id_akun'
+    );
+  }
 }

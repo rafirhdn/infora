@@ -3,19 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TataUsaha extends Model
 {
-    protected $table = 'tata_usaha';
+  use HasFactory;
 
-    protected $primaryKey = 'id_tata_usaha';
+  protected $table = 'tata_usaha';
 
-    protected $fillable = [
-        'id_akun'
-    ];
+  protected $primaryKey = 'id_tata_usaha';
 
-    public function akun()
-    {
-        return $this->belongsTo(Akun::class, 'id_akun', 'id_akun');
-    }
+  protected $fillable = [
+    'id_akun'
+  ];
+
+  public function akun()
+  {
+    return $this->belongsTo(Akun::class, 'id_akun', 'id_akun');
+  }
 }

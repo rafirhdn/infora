@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class KepalaSekolah extends Model
+class ProfilGuruBK extends Model
 {
   use HasFactory;
 
-  protected $table = 'kepala_sekolah';
-
-  protected $primaryKey = 'id_kepala_sekolah';
+  protected $table = 'profil_guru_bk';
+  protected $primaryKey = 'id_profil_guru_bk';
+  public $timestamps = true;
 
   protected $fillable = [
     'nip',
-    'id_akun'
+    'id_akun',
   ];
 
   public function akun()
